@@ -1,0 +1,58 @@
+.logo-container {
+  background: black;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-svg {
+  overflow: visible;
+}
+
+.logo-path {
+  stroke: white;
+  stroke-width: 4;
+  fill: none;
+
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+
+  animation:
+    drawLine 2.5s ease-out forwards,
+    heartbeat 1s ease-in-out 3s 2;
+}
+
+.logo-text {
+  color: white;
+  margin-top: 20px;
+  font-size: 2rem;
+  letter-spacing: 2px;
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+  animation-delay: 2.5s;
+}
+
+/* DIBUJO DESDE UNA SOLA LÍNEA */
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* DOS PALPITOS */
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.1); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* TEXTO */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}

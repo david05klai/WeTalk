@@ -1,0 +1,83 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0a0a0a;
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  overflow-y: auto;
+}
+
+.screen {
+  text-align: center;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  align-items: center;
+}
+
+/* ====== BOTTOM BAR MEJORADA ====== */
+.bottom-bar {
+  height: 70px;
+  background: linear-gradient(to top, #0f0f0f, #1a1a1a);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid #2a2a2a;
+  padding: 0 20px;
+}
+
+.bottom-bar button {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.bottom-bar button:hover {
+  color: #888;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bottom-bar button.active {
+  color: #b84dff;
+}
+
+.bottom-bar button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: linear-gradient(90deg, #7f00ff, #b84dff);
+  border-radius: 999px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 20px;
+    opacity: 1;
+  }
+}
+
+.bottom-bar button:active {
+  transform: scale(0.9);
+}

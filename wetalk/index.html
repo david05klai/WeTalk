@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#7f00ff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="WeTalk" />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="WeTalk - La app perfecta para parejas. Conecta, comparte emociones y fortalece tu relación." />
+    <meta name="keywords" content="app pareja, relaciones, amor, comunicación, chat pareja" />
+    <meta name="author" content="WeTalk" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://wetalk.vercel.app/" />
+    <meta property="og:title" content="WeTalk - App de Pareja" />
+    <meta property="og:description" content="Conecta con tu pareja de forma especial. Comparte emociones, retos y fortalece tu relación." />
+    <meta property="og:image" content="/logo.png" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://wetalk.vercel.app/" />
+    <meta property="twitter:title" content="WeTalk - App de Pareja" />
+    <meta property="twitter:description" content="Conecta con tu pareja de forma especial." />
+    <meta property="twitter:image" content="/logo.png" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <title>WeTalk - App de Pareja</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Registrar Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+              console.log('✅ Service Worker registrado:', registration.scope);
+            })
+            .catch((error) => {
+              console.log('❌ Error al registrar Service Worker:', error);
+            });
+        });
+      }
+
+      // Detectar si la app puede instalarse
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('💜 App lista para instalar');
+      });
+    </script>
+  </body>
+</html>
