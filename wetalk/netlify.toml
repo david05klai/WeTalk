@@ -1,4 +1,0 @@
-﻿[build]
-  base = "wetalk"
-  command = "npm run build"
-  publish = "wetalk/dist"
