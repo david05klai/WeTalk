@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">WeTalk</string>
+    <string name="title_activity_main">WeTalk</string>
+    <string name="package_name">com.wetalk.app</string>
+    <string name="custom_url_scheme">com.wetalk.app</string>
+</resources>

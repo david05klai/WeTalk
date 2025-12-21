@@ -7,6 +7,8 @@ import HomeApp from "./pages/HomeApp";
 import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
 
+import DownloadPage from "./pages/DownloadPage";
+
 // ====== HOME ======
 function Home() {
   const navigate = useNavigate();
@@ -18,12 +20,12 @@ function Home() {
         <h1 className="title">WeTalk</h1>
 
         <div className="buttons">
-          <button className="btn primary" onClick={() => navigate("/auth")}>
-            Conectar con pareja
+          <button className="btn primary" onClick={() => navigate("/download")}>
+            Descargar App
           </button>
 
           <button className="btn omit" onClick={() => navigate("/app/home")}>
-            Omitir
+            Probar en navegador
           </button>
         </div>
       </div>
@@ -105,6 +107,7 @@ export default function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/download" element={<DownloadPage />} />
 
         <Route path="/app" element={<AppLayout />}>
           <Route path="home" element={<HomeApp />} />
