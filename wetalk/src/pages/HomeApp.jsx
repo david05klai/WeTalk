@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { Heart, Target, Calendar, Camera, BookOpen, Gamepad2, Star, Bell, AlertCircle, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function HomeApp() {
   const [showModal, setShowModal] = useState(false);
@@ -12,6 +13,36 @@ export default function HomeApp() {
   const [shouldAskMood, setShouldAskMood] = useState(true);
   const [showMoodIcon, setShowMoodIcon] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
+  const navigate = useNavigate();
+  <button 
+  onClick={() => navigate("/download")}
+  style={{
+    position: 'fixed',
+    top: '20px',
+    right: '20px',
+    background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '999px',
+    padding: '12px 20px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    boxShadow: '0 4px 15px rgba(127, 0, 255, 0.4)',
+    zIndex: 1000,
+    transition: 'all 0.3s ease'
+  }}
+  onMouseOver={(e) => {
+    e.target.style.transform = 'translateY(-2px)';
+    e.target.style.boxShadow = '0 6px 20px rgba(127, 0, 255, 0.6)';
+  }}
+  onMouseOut={(e) => {
+    e.target.style.transform = 'translateY(0)';
+    e.target.style.boxShadow = '0 4px 15px rgba(127, 0, 255, 0.4)';
+  }}
+>
+  📱 Descargar
+</button>
 
   const moods = [
     { 

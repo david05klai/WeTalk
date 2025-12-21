@@ -15,17 +15,48 @@ function Home() {
 
   return (
     <div className="page">
+      {/* BOTÓN FLOTANTE */}
+      <button 
+        onClick={() => navigate("/download")}
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
+          color: 'white',
+          border: 'none',
+          borderRadius: '999px',
+          padding: '12px 20px',
+          fontSize: '14px',
+          fontWeight: '600',
+          cursor: 'pointer',
+          boxShadow: '0 4px 15px rgba(127, 0, 255, 0.4)',
+          zIndex: 1000,
+          transition: 'all 0.3s ease'
+        }}
+        onMouseOver={(e) => {
+          e.target.style.transform = 'translateY(-2px)';
+          e.target.style.boxShadow = '0 6px 20px rgba(127, 0, 255, 0.6)';
+        }}
+        onMouseOut={(e) => {
+          e.target.style.transform = 'translateY(0)';
+          e.target.style.boxShadow = '0 4px 15px rgba(127, 0, 255, 0.4)';
+        }}
+      >
+        📱 Descargar
+      </button>
+
       <div className="container">
         <img src="/logo.png" alt="WeTalk logo" className="logo" />
         <h1 className="title">WeTalk</h1>
 
         <div className="buttons">
-          <button className="btn primary" onClick={() => navigate("/download")}>
-            Descargar App
+          <button className="btn primary" onClick={() => navigate("/auth")}>
+            Conectar con pareja
           </button>
 
           <button className="btn omit" onClick={() => navigate("/app/home")}>
-            Probar en navegador
+            Omitir
           </button>
         </div>
       </div>
