@@ -1,6 +1,9 @@
 [build]
   base = "wetalk"
-
   command = "npm run build"
+  publish = "dist"
 
-  publish = "wetalk/dist"
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
