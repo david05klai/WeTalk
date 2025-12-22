@@ -1,6 +1,7 @@
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import InstallButton from "./components/InstallButton";
+import InstallPWA from "./components/InstallPWA";
 
 import AppLayout from "./pages/AppLayout";
 import HomeApp from "./pages/HomeApp";
@@ -107,6 +108,9 @@ export default function App() {
   return (
     <>
       <InstallButton />
+      
+      {/* BANNER DE INSTALACIÓN AUTOMÁTICO (solo Android/Chrome) */}
+      <InstallPWA />
       
       {/* BOTÓN FLOTANTE GLOBAL */}
       {showDownloadBtn && (

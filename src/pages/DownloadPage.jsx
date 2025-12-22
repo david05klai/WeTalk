@@ -5,8 +5,10 @@ export default function DownloadPage() {
   const [showIOSModal, setShowIOSModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const APP_URL = 'https://wetalk-lac.vercel.app';
+
   const handleCopy = () => {
-    navigator.clipboard.writeText('https://wetalk-parejas.netlify.app/');
+    navigator.clipboard.writeText(APP_URL);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -20,7 +22,7 @@ export default function DownloadPage() {
 
         <div style={styles.downloadButtons}>
           <button 
-            onClick={() => window.location.href = 'https://wetalk-parejas.netlify.app/'}
+            onClick={() => window.location.href = APP_URL}
             style={styles.downloadBtn}
             className="download-btn-android"
           >
@@ -101,7 +103,7 @@ export default function DownloadPage() {
             <div style={styles.urlCopy}>
               <input 
                 type="text" 
-                value="https://wetalk-parejas.netlify.app/"
+                value={APP_URL}
                 readOnly
                 style={styles.urlInput}
               />
