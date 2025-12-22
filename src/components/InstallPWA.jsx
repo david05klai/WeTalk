@@ -35,7 +35,11 @@ export default function InstallPWA() {
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // Si no hay prompt, redirigir a la página de descarga
+      window.location.href = '/download';
+      return;
+    }
 
     // Mostrar el prompt nativo
     deferredPrompt.prompt();
@@ -57,8 +61,15 @@ export default function InstallPWA() {
     setShowBanner(false);
   };
 
-  // No mostrar nada si ya está instalada o no hay prompt disponible
-  if (isInstalled || !showBanner) {
+  // Si ya está instalada, no mostrar nada
+  if (isInstalled) {
+    return null;
+  }
+
+  // Si no hay prompt pero el usuario está en móvil, mostrar banner informativo
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+  if (!showBanner && !isMobile) {
     return null;
   }
 
@@ -72,12 +83,19 @@ export default function InstallPWA() {
           </div>
           
           <div style={styles.text}>
-            <h3 style={styles.title}>Instalar WeTalk</h3>
-            <p style={styles.subtitle}>Acceso rápido desde tu pantalla de inicio</p>
+            <h3 style={styles.title}>
+              {deferredPrompt ? 'Instalar WeTalk' : '📱 Instalar App'}
+            </h3>
+            <p style={styles.subtitle}>
+              {deferredPrompt 
+                ? 'Acceso rápido desde tu pantalla de inicio'
+                : 'Ver instrucciones de instalación'
+              }
+            </p>
           </div>
 
           <button onClick={handleInstall} style={styles.installBtn}>
-            Instalar
+            {deferredPrompt ? 'Instalar' : 'Ver cómo'}
           </button>
 
           <button onClick={handleClose} style={styles.closeBtn}>
