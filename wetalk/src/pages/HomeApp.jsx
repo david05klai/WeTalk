@@ -164,31 +164,10 @@ export default function HomeApp() {
   return (
   <div className="screen home-screen">
     <div className="home-header">
-      <button 
-        onClick={() => navigate("/download")}
-        style={{
-          background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
-          color: 'white',
-          border: 'none',
-          borderRadius: '999px',
-          padding: '12px 20px',
-          fontSize: '14px',
-          fontWeight: '600',
-          cursor: 'pointer',
-          marginBottom: '20px'
-        }}
-      >
-        📱 Descargar
-      </button>
       
       <h1 className="title">WeTalk</h1>
       <p className="subtitle">Tu espacio de conexión 💜</p>
     </div>
-    
-      <div className="home-header">
-        <h1 className="title">WeTalk</h1>
-        <p className="subtitle">Tu espacio de conexión 💜</p>
-      </div>
 
       {shouldAskMood && (
         <div className="mood-section">
