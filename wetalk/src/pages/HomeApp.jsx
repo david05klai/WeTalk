@@ -1,7 +1,3 @@
-// ============================================
-// HomeApp.jsx - COMPLETO CON TODAS LAS FUNCIONES
-// ============================================
-
 import { useState, useEffect } from "react";
 import { Heart, Target, Calendar, Camera, BookOpen, Gamepad2, Star, Bell, AlertCircle, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +10,7 @@ export default function HomeApp() {
   const [showMoodIcon, setShowMoodIcon] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
   const navigate = useNavigate();
-  
+
   const moods = [
     { 
       emoji: "😊", 
@@ -128,7 +124,6 @@ export default function HomeApp() {
     },
   ];
 
-  // Verificar si ya respondió hoy
   useEffect(() => {
     const savedMood = localStorage.getItem("todayMood");
     const savedDate = localStorage.getItem("moodDate");
@@ -167,14 +162,11 @@ export default function HomeApp() {
   };
 
   return (
-    <div className="screen home-screen">
-      {/* BOTÓN FLOTANTE - AHORA SÍ EN EL LUGAR CORRECTO */}
+  <div className="screen home-screen">
+    <div className="home-header">
       <button 
         onClick={() => navigate("/download")}
         style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
           background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
           color: 'white',
           border: 'none',
@@ -183,28 +175,21 @@ export default function HomeApp() {
           fontSize: '14px',
           fontWeight: '600',
           cursor: 'pointer',
-          boxShadow: '0 4px 15px rgba(127, 0, 255, 0.4)',
-          zIndex: 1000,
-          transition: 'all 0.3s ease'
-        }}
-        onMouseOver={(e) => {
-          e.target.style.transform = 'translateY(-2px)';
-          e.target.style.boxShadow = '0 6px 20px rgba(127, 0, 255, 0.6)';
-        }}
-        onMouseOut={(e) => {
-          e.target.style.transform = 'translateY(0)';
-          e.target.style.boxShadow = '0 4px 15px rgba(127, 0, 255, 0.4)';
+          marginBottom: '20px'
         }}
       >
         📱 Descargar
       </button>
-
+      
+      <h1 className="title">WeTalk</h1>
+      <p className="subtitle">Tu espacio de conexión 💜</p>
+    </div>
+    
       <div className="home-header">
         <h1 className="title">WeTalk</h1>
         <p className="subtitle">Tu espacio de conexión 💜</p>
       </div>
-      
-      {/* BOTÓN COMPACTO PARA MOOD */}
+
       {shouldAskMood && (
         <div className="mood-section">
           <button 
@@ -220,7 +205,6 @@ export default function HomeApp() {
         </div>
       )}
 
-      {/* BOTÓN MODO SOS - SIEMPRE VISIBLE */}
       <button 
         className="sos-button"
         onClick={() => setActiveFeature('sos')}
@@ -230,7 +214,6 @@ export default function HomeApp() {
         <span className="sos-subtitle">¿Necesitas ayuda?</span>
       </button>
 
-      {/* GRID DE FUNCIONES */}
       <div className="features-grid">
         {features.map((feature) => {
           const IconComponent = feature.icon;
@@ -249,7 +232,6 @@ export default function HomeApp() {
         })}
       </div>
 
-      {/* ÍCONO FLOTANTE PEQUEÑO */}
       {showMoodIcon && todayMood && (
         <div className="floating-mood" onClick={() => setShowAdvice(true)}>
           <span className="floating-emoji">{todayMood.emoji}</span>
@@ -257,7 +239,6 @@ export default function HomeApp() {
         </div>
       )}
 
-      {/* MODAL DE SELECCIÓN DE MOOD */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -285,7 +266,6 @@ export default function HomeApp() {
         </div>
       )}
 
-      {/* MODAL DE CONSEJO */}
       {showAdvice && todayMood && (
         <div className="modal-overlay">
           <div className="modal advice-modal" onClick={(e) => e.stopPropagation()}>
@@ -314,7 +294,6 @@ export default function HomeApp() {
         </div>
       )}
 
-      {/* MODAL DE FUNCIONES */}
       {activeFeature && (
         <FeatureModal 
           featureId={activeFeature} 
@@ -324,6 +303,8 @@ export default function HomeApp() {
     </div>
   );
 }
+
+
 
 // ============================================
 // COMPONENTE DE MODAL DE FUNCIONES
