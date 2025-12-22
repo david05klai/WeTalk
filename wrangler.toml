@@ -1,5 +1,0 @@
-name = "wetalk"
-compatibility_date = "2024-12-22"
-
-[site]
-bucket = "./wetalk/dist"
