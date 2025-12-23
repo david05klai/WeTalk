@@ -3,60 +3,15 @@ import "./App.css";
 import InstallButton from "./components/InstallButton";
 import InstallPWA from "./components/InstallPWA";
 
+import Home from "./pages/Home";
+import Auth from "./pages/Auth";
 import AppLayout from "./pages/AppLayout";
 import HomeApp from "./pages/HomeApp";
 import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
 import DownloadPage from "./pages/DownloadPage";
 
-// ====== HOME ======
-function Home() {
-  const navigate = useNavigate();
-
-  return (
-    <div className="page">
-      <div className="container">
-        <img src="/logo.png" alt="WeTalk logo" className="logo" />
-        <h1 className="title">WeTalk</h1>
-
-        <div className="buttons">
-          <button className="btn primary" onClick={() => navigate("/auth")}>
-            Conectar con pareja
-          </button>
-
-          <button className="btn omit" onClick={() => navigate("/app/home")}>
-            Omitir
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ====== AUTH ======
-function Auth() {
-  const navigate = useNavigate();
-
-  return (
-    <div className="page">
-      <div className="container">
-        <h1 className="title">Bienvenido a WeTalk</h1>
-
-        <div className="buttons">
-          <button className="btn primary" onClick={() => navigate("/login")}>
-            Iniciar sesión
-          </button>
-
-          <button className="btn omit" onClick={() => navigate("/register")}>
-            Crear cuenta
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ====== LOGIN ======
+// ====== LOGIN (Temporal) ======
 function Login() {
   const navigate = useNavigate();
 
@@ -77,7 +32,7 @@ function Login() {
   );
 }
 
-// ====== REGISTER ======
+// ====== REGISTER (Temporal) ======
 function Register() {
   const navigate = useNavigate();
 
@@ -102,17 +57,15 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Mostrar botón en home y dentro de la app
-  const showDownloadBtn = location.pathname === '/' || location.pathname.startsWith('/app');
+  // Mostrar botón flotante en home y dentro de la app (pero NO en /download)
+  const showDownloadBtn = (location.pathname === '/' || location.pathname.startsWith('/app')) && location.pathname !== '/download';
 
   return (
     <>
       <InstallButton />
-      
-      {/* BANNER DE INSTALACIÓN AUTOMÁTICO (solo Android/Chrome) */}
       <InstallPWA />
       
-      {/* BOTÓN FLOTANTE GLOBAL */}
+      {/* BOTÓN FLOTANTE GLOBAL DE DESCARGA */}
       {showDownloadBtn && (
         <button 
           onClick={() => navigate("/download")}
@@ -130,7 +83,10 @@ export default function App() {
             cursor: 'pointer',
             boxShadow: '0 4px 15px rgba(127, 0, 255, 0.4)',
             zIndex: 9999,
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)';
@@ -141,7 +97,7 @@ export default function App() {
             e.currentTarget.style.boxShadow = '0 4px 15px rgba(127, 0, 255, 0.4)';
           }}
         >
-          📱 Descargar
+          📱 <span>Descargar</span>
         </button>
       )}
       

@@ -10,7 +10,7 @@ import { Users, Lock, Mail, User, Heart, Copy, Check } from "lucide-react";
 // ============================================
 // PANTALLA DE AUTENTICACIÓN
 // ============================================
-export function Auth() {
+export default function Auth() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 

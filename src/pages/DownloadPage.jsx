@@ -1,11 +1,43 @@
-import { useState } from 'react';
-import { Download, Apple, Smartphone, X, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Download, Apple, Smartphone, X, CheckCircle, Heart, Star } from 'lucide-react';
 
 export default function DownloadPage() {
+  const [showAndroidModal, setShowAndroidModal] = useState(false);
   const [showIOSModal, setShowIOSModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
-  const APP_URL = 'https://wetalk-lac.vercel.app';
+  const APP_URL = window.location.origin;
+
+  // Detectar si puede instalarse
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      console.log('✅ PWA lista para instalar');
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallAndroid = async () => {
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          console.log('✅ Usuario instaló la app');
+          setShowAndroidModal(false);
+        }
+        
+        setDeferredPrompt(null);
+      } catch (error) {
+        console.error('Error al instalar:', error);
+      }
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(APP_URL);
@@ -16,160 +48,188 @@ export default function DownloadPage() {
   return (
     <div style={styles.page}>
       <div style={styles.container}>
+        {/* Logo */}
         <img src="/logo.png" alt="WeTalk" style={styles.logo} />
-        <h1 style={styles.title}>WeTalk</h1>
-        <p style={styles.subtitle}>Descarga la app y conecta con tu pareja</p>
 
-        <div style={styles.downloadButtons}>
-          <button 
-            onClick={() => window.location.href = APP_URL}
-            style={styles.downloadBtn}
-            className="download-btn-android"
-          >
-            <Smartphone size={24} />
-            <div style={styles.btnText}>
-              <span style={styles.btnLabel}>Instalar en</span>
-              <span style={styles.btnPlatform}>Android</span>
-            </div>
+        <h1 style={styles.title}>Descarga WeTalk</h1>
+
+        <p style={styles.subtitle}>
+          Instala nuestra app y mantente conectado con tu pareja
+        </p>
+
+        {/* Botones */}
+        <div style={styles.buttons}>
+          {/* Android */}
+          <button onClick={() => setShowAndroidModal(true)} style={styles.btnPrimary}>
+            <Smartphone size={20} />
+            Descargar en Android
           </button>
 
-          <button 
-            onClick={() => setShowIOSModal(true)}
-            style={styles.downloadBtn}
-            className="download-btn-ios"
-          >
-            <Apple size={24} />
-            <div style={styles.btnText}>
-              <span style={styles.btnLabel}>Instalar en</span>
-              <span style={styles.btnPlatform}>iPhone</span>
-            </div>
+          {/* iOS */}
+          <button onClick={() => setShowIOSModal(true)} style={styles.btnOmit}>
+            <Apple size={20} />
+            Descargar en iPhone
           </button>
         </div>
 
-        <div style={styles.info}>
-          <p style={styles.infoText}>🔒 100% segura y gratuita</p>
-          <p style={styles.infoText}>💜 Diseñada para fortalecer tu relación</p>
+        {/* Mensaje de apoyo */}
+        <div style={styles.supportBox}>
+          <Heart size={18} color="#ff6b9d" fill="#ff6b9d" />
+          <p style={styles.supportText}>
+            ¿Te gusta WeTalk? Apóyanos dejando una reseña para llegar a las tiendas oficiales
+          </p>
         </div>
       </div>
 
-      {showIOSModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowIOSModal(false)}>
+      {/* ============================================
+          MODAL ANDROID
+          ============================================ */}
+      {showAndroidModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowAndroidModal(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <button 
-              style={styles.closeBtn}
-              onClick={() => setShowIOSModal(false)}
-            >
-              <X size={24} />
+            <button onClick={() => setShowAndroidModal(false)} style={styles.closeBtn}>
+              <X size={24} color="white" />
             </button>
 
-            <div style={styles.modalHeader}>
-              <Apple size={64} color="#fff" />
-              <h2 style={styles.modalTitle}>Instalar en iPhone</h2>
-              <p style={styles.modalSubtitle}>Sigue estos 3 sencillos pasos</p>
-            </div>
+            <h2 style={styles.modalTitle}>
+              <Smartphone size={28} />
+              Instalar en Android
+            </h2>
 
             <div style={styles.steps}>
               <div style={styles.step}>
                 <div style={styles.stepNumber}>1</div>
-                <div style={styles.stepContent}>
-                  <h3 style={styles.stepTitle}>Abre Safari</h3>
-                  <p style={styles.stepText}>
-                    Asegúrate de abrir este enlace en el navegador Safari
+                <p style={styles.stepText}>
+                  Abre esta página en <strong>Chrome</strong>
+                </p>
+              </div>
+
+              <div style={styles.step}>
+                <div style={styles.stepNumber}>2</div>
+                <p style={styles.stepText}>
+                  Toca los <strong>3 puntos (⋮)</strong> en la esquina superior derecha
+                </p>
+              </div>
+
+              <div style={styles.step}>
+                <div style={styles.stepNumber}>3</div>
+                <p style={styles.stepText}>
+                  Selecciona <strong>"Agregar a pantalla de inicio"</strong> o <strong>"Instalar app"</strong>
+                </p>
+              </div>
+
+              <div style={styles.step}>
+                <div style={styles.stepNumber}>4</div>
+                <p style={styles.stepText}>
+                  Confirma y ¡listo! WeTalk estará en tu pantalla de inicio 🎉
+                </p>
+              </div>
+
+              {/* Botón de instalación rápida si está disponible */}
+              {deferredPrompt && (
+                <>
+                  <div style={styles.divider}>o</div>
+                  <button onClick={handleInstallAndroid} style={styles.quickInstallBtn}>
+                    <Download size={20} />
+                    Instalación Rápida
+                  </button>
+                  <p style={styles.quickInstallText}>
+                    ⚡ Click aquí para instalar con un solo toque
                   </p>
+                </>
+              )}
+            </div>
+
+            {/* Apoyo Play Store */}
+            <div style={styles.supportSection}>
+              <Star size={20} color="#FFD700" fill="#FFD700" />
+              <div>
+                <p style={styles.supportTitle}>Ayúdanos a llegar a Play Store</p>
+                <p style={styles.supportDesc}>
+                  Con tu apoyo podremos publicar WeTalk en Google Play y llegar a más parejas
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================
+          MODAL iOS
+          ============================================ */}
+      {showIOSModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowIOSModal(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowIOSModal(false)} style={styles.closeBtn}>
+              <X size={24} color="white" />
+            </button>
+
+            <h2 style={styles.modalTitle}>
+              <Apple size={28} />
+              Instalar en iPhone
+            </h2>
+
+            <div style={styles.steps}>
+              <div style={styles.step}>
+                <div style={styles.stepNumber}>1</div>
+                <div>
+                  <p style={styles.stepText}>Copia esta URL:</p>
+                  <div style={styles.urlBox}>
+                    <input 
+                      type="text" 
+                      value={APP_URL}
+                      readOnly
+                      style={styles.urlInput}
+                    />
+                    <button onClick={handleCopy} style={styles.copyBtn}>
+                      {copied ? <CheckCircle size={18} /> : 'Copiar'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <div style={styles.step}>
                 <div style={styles.stepNumber}>2</div>
-                <div style={styles.stepContent}>
-                  <h3 style={styles.stepTitle}>Toca el botón Compartir</h3>
-                  <p style={styles.stepText}>
-                    Busca el ícono de compartir □↑ en la parte inferior
-                  </p>
-                </div>
+                <p style={styles.stepText}>
+                  Abre la URL en <strong>Safari</strong> (no Chrome)
+                </p>
               </div>
 
               <div style={styles.step}>
                 <div style={styles.stepNumber}>3</div>
-                <div style={styles.stepContent}>
-                  <h3 style={styles.stepTitle}>Añadir a pantalla de inicio</h3>
-                  <p style={styles.stepText}>
-                    Selecciona "Añadir a pantalla de inicio" y confirma
-                  </p>
-                </div>
+                <p style={styles.stepText}>
+                  Toca el botón <strong>Compartir 📤</strong> en la barra inferior
+                </p>
+              </div>
+
+              <div style={styles.step}>
+                <div style={styles.stepNumber}>4</div>
+                <p style={styles.stepText}>
+                  Busca y selecciona <strong>"Añadir a pantalla de inicio"</strong>
+                </p>
+              </div>
+
+              <div style={styles.step}>
+                <div style={styles.stepNumber}>5</div>
+                <p style={styles.stepText}>
+                  Confirma y ¡listo! WeTalk estará en tu pantalla de inicio 🎉
+                </p>
               </div>
             </div>
 
-            <div style={styles.urlCopy}>
-              <input 
-                type="text" 
-                value={APP_URL}
-                readOnly
-                style={styles.urlInput}
-              />
-              <button 
-                onClick={handleCopy}
-                style={styles.copyButton}
-              >
-                {copied ? <CheckCircle size={20} /> : <Download size={20} />}
-              </button>
+            {/* Apoyo App Store */}
+            <div style={styles.supportSection}>
+              <Star size={20} color="#FFD700" fill="#FFD700" />
+              <div>
+                <p style={styles.supportTitle}>Ayúdanos a llegar a App Store</p>
+                <p style={styles.supportDesc}>
+                  Con tu apoyo podremos publicar WeTalk en la App Store y llegar a más parejas
+                </p>
+              </div>
             </div>
-
-            <p style={styles.finalNote}>
-              ✨ Una vez instalada, la app funcionará como cualquier app nativa
-            </p>
           </div>
         </div>
       )}
-
-      <style>{`
-        .download-btn-android {
-          background: linear-gradient(135deg, #34D399, #10B981);
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          padding: 20px 30px;
-          border-radius: 16px;
-          border: none;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
-          color: white;
-        }
-
-        .download-btn-android:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 35px rgba(16, 185, 129, 0.5);
-        }
-
-        .download-btn-android:active {
-          transform: scale(0.98);
-        }
-
-        .download-btn-ios {
-          background: linear-gradient(135deg, #3B82F6, #2563EB);
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          padding: 20px 30px;
-          border-radius: 16px;
-          border: none;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
-          color: white;
-        }
-
-        .download-btn-ios:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 35px rgba(37, 99, 235, 0.5);
-        }
-
-        .download-btn-ios:active {
-          transform: scale(0.98);
-        }
-      `}</style>
     </div>
   );
 }
@@ -184,69 +244,94 @@ const styles = {
     padding: '20px',
   },
   container: {
+    maxWidth: '400px',
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '30px',
-    maxWidth: '500px',
-    width: '100%',
+    gap: '25px',
   },
   logo: {
-    width: '120px',
+    width: '150px',
+    maxWidth: '80%',
   },
   title: {
     color: 'white',
-    fontSize: '36px',
-    fontWeight: '700',
-    margin: '-10px 0 0 0',
+    fontSize: '28px',
+    fontWeight: '600',
+    letterSpacing: '1px',
+    margin: 0,
+    textAlign: 'center',
   },
   subtitle: {
     color: '#888',
+    textAlign: 'center',
+    fontSize: '15px',
+    maxWidth: '300px',
+    lineHeight: '1.5',
+    margin: 0,
+  },
+  buttons: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '18px',
+    width: '260px',
+  },
+  btnPrimary: {
+    padding: '14px 0',
+    borderRadius: '999px',
     fontSize: '16px',
-    textAlign: 'center',
-    marginTop: '-15px',
-  },
-  downloadButtons: {
+    cursor: 'pointer',
+    transition: 'all 0.25s ease',
+    border: 'none',
+    background: 'white',
+    color: 'black',
+    boxShadow: '0 6px 18px rgba(255, 255, 255, 0.25)',
     display: 'flex',
-    flexDirection: 'column',
-    gap: '15px',
-    width: '100%',
-    maxWidth: '320px',
-    marginTop: '10px',
-  },
-  downloadBtn: {
-    color: 'white',
-  },
-  btnText: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: '2px',
-  },
-  btnLabel: {
-    fontSize: '13px',
-    opacity: 0.9,
-  },
-  btnPlatform: {
-    fontSize: '18px',
-    fontWeight: '600',
-  },
-  info: {
-    display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: '8px',
-    marginTop: '10px',
+    fontWeight: '500',
   },
-  infoText: {
-    color: '#666',
-    fontSize: '14px',
-    textAlign: 'center',
+  btnOmit: {
+    padding: '14px 0',
+    borderRadius: '999px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.25s ease',
+    border: 'none',
+    background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
+    color: 'white',
+    boxShadow: '0 6px 18px rgba(183, 77, 255, 0.35)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontWeight: '500',
   },
+  supportBox: {
+    background: 'rgba(255, 107, 157, 0.1)',
+    border: '1px solid rgba(255, 107, 157, 0.3)',
+    borderRadius: '16px',
+    padding: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    maxWidth: '300px',
+  },
+  supportText: {
+    color: '#ccc',
+    fontSize: '13px',
+    lineHeight: '1.5',
+    margin: 0,
+  },
+  
+  // MODAL
   modalOverlay: {
     position: 'fixed',
     inset: 0,
     background: 'rgba(0, 0, 0, 0.9)',
-    backdropFilter: 'blur(10px)',
+    backdropFilter: 'blur(8px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -254,50 +339,34 @@ const styles = {
     padding: '20px',
   },
   modal: {
-    background: 'linear-gradient(135deg, #1a1a1a, #2a2a2a)',
-    borderRadius: '24px',
+    background: '#1a1a1a',
+    borderRadius: '20px',
     padding: '30px',
-    maxWidth: '500px',
+    maxWidth: '420px',
     width: '100%',
+    border: '1px solid #333',
+    position: 'relative',
     maxHeight: '90vh',
     overflowY: 'auto',
-    position: 'relative',
-    border: '1px solid #333',
-    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
   },
   closeBtn: {
     position: 'absolute',
-    top: '20px',
-    right: '20px',
-    background: 'rgba(255, 255, 255, 0.1)',
+    top: '15px',
+    right: '15px',
+    background: 'none',
     border: 'none',
-    borderRadius: '50%',
-    width: '40px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     cursor: 'pointer',
-    color: 'white',
-    transition: 'all 0.3s ease',
-  },
-  modalHeader: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '15px',
-    marginBottom: '30px',
+    padding: '5px',
+    transition: 'transform 0.2s ease',
   },
   modalTitle: {
     color: 'white',
     fontSize: '24px',
     fontWeight: '600',
-    margin: 0,
-  },
-  modalSubtitle: {
-    color: '#888',
-    fontSize: '14px',
-    margin: 0,
+    marginBottom: '25px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
   },
   steps: {
     display: 'flex',
@@ -307,68 +376,108 @@ const styles = {
   },
   step: {
     display: 'flex',
-    gap: '15px',
     alignItems: 'flex-start',
+    gap: '12px',
   },
   stepNumber: {
+    width: '28px',
+    height: '28px',
+    borderRadius: '50%',
     background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
     color: 'white',
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '18px',
-    fontWeight: '700',
+    fontWeight: 'bold',
+    fontSize: '14px',
     flexShrink: 0,
-  },
-  stepContent: {
-    flex: 1,
-  },
-  stepTitle: {
-    color: 'white',
-    fontSize: '16px',
-    fontWeight: '600',
-    margin: '0 0 5px 0',
+    marginTop: '2px',
   },
   stepText: {
-    color: '#aaa',
-    fontSize: '14px',
+    color: '#ccc',
+    fontSize: '15px',
+    margin: '4px 0 0 0',
     lineHeight: '1.5',
-    margin: 0,
   },
-  urlCopy: {
+  urlBox: {
     display: 'flex',
-    gap: '10px',
-    marginBottom: '20px',
-    background: '#1a1a1a',
-    padding: '12px',
-    borderRadius: '12px',
-    border: '1px solid #2a2a2a',
+    gap: '8px',
+    width: '100%',
+    marginTop: '10px',
   },
   urlInput: {
     flex: 1,
-    background: 'transparent',
-    border: 'none',
-    color: '#888',
+    padding: '10px 12px',
+    background: '#0f0f0f',
+    border: '1px solid #333',
+    borderRadius: '8px',
+    color: 'white',
     fontSize: '13px',
     outline: 'none',
   },
-  copyButton: {
+  copyBtn: {
+    padding: '10px 16px',
     background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
+    color: 'white',
     border: 'none',
     borderRadius: '8px',
-    padding: '8px 12px',
     cursor: 'pointer',
-    color: 'white',
-    transition: 'all 0.3s ease',
+    fontWeight: '600',
+    fontSize: '13px',
+    transition: 'all 0.25s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    whiteSpace: 'nowrap',
   },
-  finalNote: {
+  divider: {
+    textAlign: 'center',
     color: '#666',
+    fontSize: '14px',
+    margin: '10px 0',
+  },
+  quickInstallBtn: {
+    width: '100%',
+    padding: '14px 0',
+    borderRadius: '12px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.25s ease',
+    border: 'none',
+    background: 'linear-gradient(135deg, #10B981, #059669)',
+    color: 'white',
+    boxShadow: '0 6px 18px rgba(16, 185, 129, 0.35)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontWeight: '600',
+  },
+  quickInstallText: {
+    color: '#888',
     fontSize: '13px',
     textAlign: 'center',
-    margin: 0,
+    margin: '5px 0 0 0',
+  },
+  supportSection: {
+    background: 'rgba(255, 215, 0, 0.1)',
+    border: '1px solid rgba(255, 215, 0, 0.3)',
+    borderRadius: '12px',
+    padding: '16px',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '12px',
+  },
+  supportTitle: {
+    color: 'white',
+    fontSize: '15px',
+    fontWeight: '600',
+    margin: '0 0 6px 0',
+  },
+  supportDesc: {
+    color: '#aaa',
+    fontSize: '13px',
     lineHeight: '1.5',
+    margin: 0,
   },
 };

@@ -34,20 +34,20 @@ export default function InstallPWA() {
       setDeferredPrompt(null);
     });
 
-    // Si es móvil pero no hay prompt después de 2 segundos, mostrar banner informativo
+    // SIEMPRE mostrar banner en móviles después de 3 segundos
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
       setTimeout(() => {
-        if (!deferredPrompt && !isInstalled) {
+        if (!isInstalled && sessionStorage.getItem('installBannerClosed') !== 'true') {
           setShowBanner(true);
         }
-      }, 2000);
+      }, 3000);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
-  }, []);
+  }, [isInstalled]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) {
