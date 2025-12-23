@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showBanner, setShowBanner] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Detectar si ya está instalada
@@ -14,126 +16,88 @@ export default function InstallPWA() {
     }
 
     // Si ya cerró el banner en esta sesión, no mostrarlo
-    if (sessionStorage.getItem('installBannerClosed') === 'true') {
+    if (sessionStorage.getItem('installBannerClosed')) {
       return;
     }
 
-    // Capturar el evento de instalación (SOLO ANDROID/CHROME)
+    // Capturar el evento de instalación
     const handleBeforeInstall = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowBanner(true);
+      
+      // Mostrar banner después de 3 segundos
+      setTimeout(() => {
+        setShowBanner(true);
+      }, 3000);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-    // Detectar si se instaló
-    window.addEventListener('appinstalled', () => {
-      setIsInstalled(true);
-      setShowBanner(false);
-      setDeferredPrompt(null);
-    });
-
-    // SIEMPRE mostrar banner en móviles después de 3 segundos
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      setTimeout(() => {
-        if (!isInstalled && sessionStorage.getItem('installBannerClosed') !== 'true') {
-          setShowBanner(true);
-        }
-      }, 3000);
-    }
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-    };
-  }, [isInstalled]);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) {
-      // Si no hay prompt, redirigir a la página de descarga
-      window.location.href = '/download';
-      return;
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          console.log('✅ Usuario instaló la app');
+        }
+        
+        setDeferredPrompt(null);
+        setShowBanner(false);
+      } catch (error) {
+        console.error('Error al instalar:', error);
+      }
     }
+  };
 
-    // Mostrar el prompt nativo
-    deferredPrompt.prompt();
-
-    // Esperar la respuesta del usuario
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('✅ PWA instalada correctamente');
-    } else {
-      console.log('❌ Usuario canceló la instalación');
-    }
-
-    setDeferredPrompt(null);
+  const handleViewInstructions = () => {
     setShowBanner(false);
+    navigate('/download'); // ← ARREGLADO: Ahora sí va a /download
   };
 
   const handleClose = () => {
     setShowBanner(false);
-    // Guardar en localStorage para no volver a mostrar en esta sesión
     sessionStorage.setItem('installBannerClosed', 'true');
   };
 
-  // Si ya está instalada, no mostrar nada
-  if (isInstalled) {
-    return null;
-  }
-
-  // Si no hay prompt pero el usuario está en móvil, mostrar banner informativo
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
-  if (!showBanner && !isMobile) {
+  // Si ya está instalada o no hay banner, no mostrar nada
+  if (isInstalled || !showBanner) {
     return null;
   }
 
   return (
-    <>
-      {/* BANNER INFERIOR */}
-      <div style={styles.banner}>
-        <div style={styles.content}>
-          <div style={styles.icon}>
-            <Download size={24} />
-          </div>
-          
-          <div style={styles.text}>
-            <h3 style={styles.title}>
-              {deferredPrompt ? 'Instalar WeTalk' : '📱 Instalar App'}
-            </h3>
-            <p style={styles.subtitle}>
-              {deferredPrompt 
-                ? 'Acceso rápido desde tu pantalla de inicio'
-                : 'Ver instrucciones de instalación'
-              }
-            </p>
-          </div>
+    <div style={styles.banner}>
+      <button onClick={handleClose} style={styles.closeBtn}>
+        <X size={20} color="white" />
+      </button>
 
-          <button onClick={handleInstall} style={styles.installBtn}>
-            {deferredPrompt ? 'Instalar' : 'Ver cómo'}
-          </button>
+      <div style={styles.content}>
+        <div style={styles.icon}>
+          <Download size={24} color="white" />
+        </div>
+        
+        <div style={styles.text}>
+          <div style={styles.title}>Instalar WeTalk</div>
+          <div style={styles.subtitle}>Agregar a pantalla de inicio</div>
+        </div>
 
-          <button onClick={handleClose} style={styles.closeBtn}>
-            <X size={20} />
-          </button>
+        <div style={styles.buttons}>
+          {deferredPrompt ? (
+            <button onClick={handleInstall} style={styles.installBtn}>
+              Instalar
+            </button>
+          ) : (
+            <button onClick={handleViewInstructions} style={styles.instructionsBtn}>
+              Ver cómo
+            </button>
+          )}
         </div>
       </div>
-
-      <style>{`
-        @keyframes slideUp {
-          from {
-            transform: translateY(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
-    </>
+    </div>
   );
 }
 
@@ -145,27 +109,39 @@ const styles = {
     right: 0,
     background: 'linear-gradient(135deg, #1a1a1a, #2a2a2a)',
     borderTop: '1px solid #333',
-    padding: '16px',
-    zIndex: 9999,
-    animation: 'slideUp 0.4s ease-out',
+    padding: '16px 20px',
+    zIndex: 999,
     boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.5)',
+    animation: 'slideUp 0.4s ease',
   },
-  content: {
-    maxWidth: '600px',
-    margin: '0 auto',
+  closeBtn: {
+    position: 'absolute',
+    top: '12px',
+    right: '12px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '4px',
     display: 'flex',
     alignItems: 'center',
-    gap: '15px',
+    justifyContent: 'center',
+    transition: 'transform 0.2s ease',
+  },
+  content: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    maxWidth: '600px',
+    margin: '0 auto',
   },
   icon: {
     width: '48px',
     height: '48px',
-    background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
     borderRadius: '12px',
+    background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: 'white',
     flexShrink: 0,
   },
   text: {
@@ -175,38 +151,38 @@ const styles = {
     color: 'white',
     fontSize: '16px',
     fontWeight: '600',
-    margin: '0 0 4px 0',
+    marginBottom: '2px',
   },
   subtitle: {
     color: '#888',
     fontSize: '13px',
-    margin: 0,
+  },
+  buttons: {
+    display: 'flex',
+    gap: '8px',
   },
   installBtn: {
+    padding: '10px 20px',
+    background: 'linear-gradient(135deg, #10B981, #059669)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: '600',
+    fontSize: '14px',
+    transition: 'all 0.25s ease',
+    whiteSpace: 'nowrap',
+  },
+  instructionsBtn: {
+    padding: '10px 20px',
     background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
     color: 'white',
     border: 'none',
-    borderRadius: '12px',
-    padding: '12px 24px',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 4px 15px rgba(127, 0, 255, 0.4)',
-    flexShrink: 0,
-  },
-  closeBtn: {
-    background: 'rgba(255, 255, 255, 0.1)',
-    color: '#888',
-    border: 'none',
     borderRadius: '8px',
-    width: '36px',
-    height: '36px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    flexShrink: 0,
+    fontWeight: '600',
+    fontSize: '14px',
+    transition: 'all 0.25s ease',
+    whiteSpace: 'nowrap',
   },
 };

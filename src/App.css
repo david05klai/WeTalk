@@ -2047,3 +2047,42 @@ body {
 .install-button:active {
   transform: scale(0.95);
 }
+
+/* ============================================
+   ANIMACIONES PARA PWA Y MODALES
+   Agregar al FINAL de App.css
+   ============================================ */
+
+/* Animación del banner de instalación */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animación del overlay de modales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Animación de los modales */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

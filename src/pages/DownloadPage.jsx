@@ -1,43 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Download, Apple, Smartphone, X, CheckCircle, Heart, Star } from 'lucide-react';
+import { useState } from 'react';
+import { Download, Apple, Smartphone, X, Heart, Star } from 'lucide-react';
 
 export default function DownloadPage() {
   const [showAndroidModal, setShowAndroidModal] = useState(false);
   const [showIOSModal, setShowIOSModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   const APP_URL = window.location.origin;
-
-  // Detectar si puede instalarse
-  useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      console.log('✅ PWA lista para instalar');
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const handleInstallAndroid = async () => {
-    if (deferredPrompt) {
-      try {
-        await deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-          console.log('✅ Usuario instaló la app');
-          setShowAndroidModal(false);
-        }
-        
-        setDeferredPrompt(null);
-      } catch (error) {
-        console.error('Error al instalar:', error);
-      }
-    }
-  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(APP_URL);
@@ -124,20 +93,6 @@ export default function DownloadPage() {
                   Confirma y ¡listo! WeTalk estará en tu pantalla de inicio 🎉
                 </p>
               </div>
-
-              {/* Botón de instalación rápida si está disponible */}
-              {deferredPrompt && (
-                <>
-                  <div style={styles.divider}>o</div>
-                  <button onClick={handleInstallAndroid} style={styles.quickInstallBtn}>
-                    <Download size={20} />
-                    Instalación Rápida
-                  </button>
-                  <p style={styles.quickInstallText}>
-                    ⚡ Click aquí para instalar con un solo toque
-                  </p>
-                </>
-              )}
             </div>
 
             {/* Apoyo Play Store */}
@@ -182,7 +137,7 @@ export default function DownloadPage() {
                       style={styles.urlInput}
                     />
                     <button onClick={handleCopy} style={styles.copyBtn}>
-                      {copied ? <CheckCircle size={18} /> : 'Copiar'}
+                      {copied ? '✓' : 'Copiar'}
                     </button>
                   </div>
                 </div>
@@ -337,6 +292,7 @@ const styles = {
     justifyContent: 'center',
     zIndex: 1000,
     padding: '20px',
+    animation: 'fadeIn 0.25s ease',
   },
   modal: {
     background: '#1a1a1a',
@@ -348,6 +304,7 @@ const styles = {
     position: 'relative',
     maxHeight: '90vh',
     overflowY: 'auto',
+    animation: 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
   },
   closeBtn: {
     position: 'absolute',
@@ -425,39 +382,7 @@ const styles = {
     fontWeight: '600',
     fontSize: '13px',
     transition: 'all 0.25s ease',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
     whiteSpace: 'nowrap',
-  },
-  divider: {
-    textAlign: 'center',
-    color: '#666',
-    fontSize: '14px',
-    margin: '10px 0',
-  },
-  quickInstallBtn: {
-    width: '100%',
-    padding: '14px 0',
-    borderRadius: '12px',
-    fontSize: '16px',
-    cursor: 'pointer',
-    transition: 'all 0.25s ease',
-    border: 'none',
-    background: 'linear-gradient(135deg, #10B981, #059669)',
-    color: 'white',
-    boxShadow: '0 6px 18px rgba(16, 185, 129, 0.35)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-    fontWeight: '600',
-  },
-  quickInstallText: {
-    color: '#888',
-    fontSize: '13px',
-    textAlign: 'center',
-    margin: '5px 0 0 0',
   },
   supportSection: {
     background: 'rgba(255, 215, 0, 0.1)',
