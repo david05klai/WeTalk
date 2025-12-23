@@ -13,6 +13,11 @@ export default function InstallPWA() {
       return;
     }
 
+    // Si ya cerró el banner en esta sesión, no mostrarlo
+    if (sessionStorage.getItem('installBannerClosed') === 'true') {
+      return;
+    }
+
     // Capturar el evento de instalación (SOLO ANDROID/CHROME)
     const handleBeforeInstall = (e) => {
       e.preventDefault();
@@ -28,6 +33,16 @@ export default function InstallPWA() {
       setShowBanner(false);
       setDeferredPrompt(null);
     });
+
+    // Si es móvil pero no hay prompt después de 2 segundos, mostrar banner informativo
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      setTimeout(() => {
+        if (!deferredPrompt && !isInstalled) {
+          setShowBanner(true);
+        }
+      }, 2000);
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -59,6 +74,8 @@ export default function InstallPWA() {
 
   const handleClose = () => {
     setShowBanner(false);
+    // Guardar en localStorage para no volver a mostrar en esta sesión
+    sessionStorage.setItem('installBannerClosed', 'true');
   };
 
   // Si ya está instalada, no mostrar nada
