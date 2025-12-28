@@ -1,16 +1,25 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, AlertCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Settings() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    // Limpia todo el localStorage
-    localStorage.clear();
-    // Redirige al inicio
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      await logout();
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      alert("Error al cerrar sesión");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,6 +38,7 @@ export default function Settings() {
         {/* Botón de cerrar sesión */}
         <button
           onClick={() => setShowLogoutModal(true)}
+          disabled={loading}
           style={{
             background: 'linear-gradient(135deg, #EF4444, #DC2626)',
             color: 'white',
@@ -37,17 +47,20 @@ export default function Settings() {
             padding: '16px 20px',
             fontSize: '16px',
             fontWeight: '600',
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '10px',
             transition: 'all 0.3s ease',
-            boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)'
+            boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)',
+            opacity: loading ? 0.6 : 1
           }}
           onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(239, 68, 68, 0.5)';
+            if (!loading) {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(239, 68, 68, 0.5)';
+            }
           }}
           onMouseOut={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
@@ -55,7 +68,7 @@ export default function Settings() {
           }}
         >
           <LogOut size={20} />
-          Cerrar Sesión
+          {loading ? "Cerrando..." : "Cerrar Sesión"}
         </button>
 
         <p style={{ 
@@ -95,7 +108,7 @@ export default function Settings() {
                 fontSize: '15px',
                 lineHeight: '1.6'
               }}>
-                Se perderán todos tus datos locales (estado de ánimo, retos, mensajes guardados).
+                Tus datos están guardados. Podrás volver a iniciar sesión cuando quieras.
               </p>
 
               <div style={{ 
@@ -107,17 +120,21 @@ export default function Settings() {
                 <button 
                   className="btn primary"
                   onClick={handleLogout}
+                  disabled={loading}
                   style={{
                     background: 'linear-gradient(135deg, #EF4444, #DC2626)',
-                    boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)'
+                    boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.6 : 1
                   }}
                 >
-                  Sí, cerrar sesión
+                  {loading ? "Cerrando..." : "Sí, cerrar sesión"}
                 </button>
                 
                 <button 
                   className="close-modal"
                   onClick={() => setShowLogoutModal(false)}
+                  disabled={loading}
                 >
                   Cancelar
                 </button>

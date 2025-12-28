@@ -4,68 +4,25 @@ import InstallButton from "./components/InstallButton";
 import InstallPWA from "./components/InstallPWA";
 
 import Home from "./pages/Home";
-import Auth from "./pages/Auth";
+import Auth, { Login, Register } from "./pages/Auth"; // Importar Login y Register
 import AppLayout from "./pages/AppLayout";
 import HomeApp from "./pages/HomeApp";
 import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
 import DownloadPage from "./pages/DownloadPage";
+import { AuthProvider } from "./context/AuthContext";
 
-// ====== LOGIN (Temporal) ======
-function Login() {
-  const navigate = useNavigate();
-
-  return (
-    <div className="page">
-      <div className="container">
-        <h1 className="title">En desarrollo</h1>
-        <p className="text">
-          Esta función todavía está en trabajo.  
-          Pronto funcionará 😉
-        </p>
-
-        <button className="btn primary" onClick={() => navigate(-1)}>
-          Volver
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ====== REGISTER (Temporal) ======
-function Register() {
-  const navigate = useNavigate();
-
-  return (
-    <div className="page">
-      <div className="container">
-        <h1 className="title">Crear cuenta</h1>
-
-        <input className="input" placeholder="Correo electrónico" />
-        <input className="input" type="password" placeholder="Contraseña" />
-
-        <button className="btn primary" onClick={() => navigate("/app/home")}>
-          Continuar
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ====== APP PRINCIPAL ======
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Mostrar botón flotante en home y dentro de la app (pero NO en /download)
   const showDownloadBtn = (location.pathname === '/' || location.pathname.startsWith('/app')) && location.pathname !== '/download';
 
   return (
-    <>
+    <AuthProvider>
       <InstallButton />
       <InstallPWA />
       
-      {/* BOTÓN FLOTANTE GLOBAL DE DESCARGA */}
       {showDownloadBtn && (
         <button 
           onClick={() => navigate("/download")}
@@ -114,6 +71,6 @@ export default function App() {
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
-    </>
+    </AuthProvider>
   );
 }

@@ -1,55 +1,49 @@
-// ============================================
-// SISTEMA DE AUTENTICACIÓN - WeTalk
-// Reemplaza las funciones Auth, Login, Register en App.jsx
-// ============================================
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, Lock, Mail, User, Heart, Copy, Check } from "lucide-react";
+import { Lock, Mail, User, Heart, Copy, Check, LogOut, Sparkles, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import "./Auth.css";
 
-// ============================================
-// PANTALLA DE AUTENTICACIÓN
-// ============================================
+// PANTALLA PRINCIPAL DE AUTH
 export default function Auth() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, userProfile } = useAuth();
 
   useEffect(() => {
-    const user = localStorage.getItem("currentUser");
-    if (user) {
-      setIsLoggedIn(true);
+    if (user && userProfile?.partnerId) {
+      navigate("/app/home");
     }
-  }, []);
+  }, [user, userProfile, navigate]);
 
-  if (isLoggedIn) {
+  if (user && userProfile) {
     return <ConnectPartner />;
   }
 
   return (
-    <div className="page auth-page">
-      <div className="auth-container">
-        <div className="auth-icon-container">
-          <Heart size={64} color="#b84dff" fill="#b84dff" />
+    <div className="auth-page">
+      <div className="auth-content">
+        <div className="heart-container">
+          <div className="heart-glow"></div>
+          <Heart className="heart-icon" size={100} strokeWidth={2} />
+          <Sparkles className="sparkle sparkle-1" size={20} />
+          <Sparkles className="sparkle sparkle-2" size={16} />
+          <Sparkles className="sparkle sparkle-3" size={18} />
         </div>
         
-        <h1 className="title">Bienvenido a WeTalk</h1>
-        <p className="auth-description">
-          Conecta con tu pareja y fortalece su relación 💜
+        <h1 className="auth-title">Bienvenido a WeTalk</h1>
+        <p className="auth-subtitle">
+          Conecta con tu pareja y fortalece su relación
         </p>
 
-        <div className="buttons">
-          <button className="btn primary" onClick={() => navigate("/login")}>
-            <Lock size={20} />
-            Iniciar sesión
+        <div className="auth-buttons">
+          <button className="auth-btn primary-btn" onClick={() => navigate("/login")}>
+            <Lock size={22} />
+            <span>Iniciar sesión</span>
           </button>
 
-          <button className="btn omit" onClick={() => navigate("/register")}>
-            <User size={20} />
-            Crear cuenta
-          </button>
-
-          <button className="btn-link" onClick={() => navigate("/app/home")}>
-            Continuar sin cuenta
+          <button className="auth-btn secondary-btn" onClick={() => navigate("/register")}>
+            <User size={22} />
+            <span>Crear cuenta</span>
           </button>
         </div>
       </div>
@@ -57,87 +51,119 @@ export default function Auth() {
   );
 }
 
-// ============================================
-// INICIO DE SESIÓN
-// ============================================
+// LOGIN
 export function Login() {
   const navigate = useNavigate();
+  const { loginWithEmail, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       setError("Por favor completa todos los campos");
       return;
     }
 
-    // Buscar usuario en localStorage
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-      localStorage.setItem("currentUser", JSON.stringify(user));
+    try {
+      setLoading(true);
       setError("");
-      
-      // Si ya tiene pareja, ir directo a la app
-      if (user.partnerId) {
+      const result = await loginWithEmail(email, password);
+      if (result) {
         navigate("/app/home");
-      } else {
-        navigate("/auth"); // Ir a conectar pareja
       }
-    } else {
-      setError("Email o contraseña incorrectos");
+    } catch (error) {
+      console.error("Error en login:", error);
+      if (error.code === "auth/user-not-found") {
+        setError("Usuario no encontrado");
+      } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+        setError("Contraseña incorrecta");
+      } else if (error.code === "auth/invalid-email") {
+        setError("Email inválido");
+      } else {
+        setError("Error al iniciar sesión: " + error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const result = await loginWithGoogle();
+      if (result) {
+        navigate("/app/home");
+      }
+    } catch (error) {
+      setError("Error al iniciar sesión con Google");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="page auth-page">
-      <div className="auth-container">
-        <h1 className="title">Iniciar sesión</h1>
-        <p className="auth-description">
-          Ingresa tus datos para continuar
-        </p>
+    <div className="auth-page">
+      <div className="auth-content">
+        <h1 className="auth-title">Iniciar sesión</h1>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="auth-error">{error}</div>}
 
         <div className="auth-form">
-          <div className="input-group">
-            <Mail size={20} color="#888" />
+          <div className="input-wrapper">
+            <Mail className="input-icon" size={20} />
             <input
-              className="input"
+              className="auth-input"
               type="email"
               placeholder="Correo electrónico"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
 
-          <div className="input-group">
-            <Lock size={20} color="#888" />
+          <div className="input-wrapper">
+            <Lock className="input-icon" size={20} />
             <input
-              className="input"
-              type="password"
+              className="auth-input"
+              type={showPassword ? "text" : "password"}
               placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+              disabled={loading}
             />
+            <button 
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              type="button"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
         </div>
 
-        <div className="buttons">
-          <button className="btn primary" onClick={handleLogin}>
-            Entrar
+        <div className="auth-buttons">
+          <button className="auth-btn primary-btn" onClick={handleLogin} disabled={loading}>
+            <span>{loading ? "Cargando..." : "Continuar"}</span>
           </button>
 
-          <button className="btn secondary" onClick={() => navigate("/auth")}>
-            Volver
+          <button className="auth-btn google-btn" onClick={handleGoogleLogin} disabled={loading}>
+            <Lock size={20} />
+            <span>Continuar con Google</span>
+          </button>
+
+          <button className="auth-btn tertiary-btn" onClick={() => navigate("/auth")} disabled={loading}>
+            <span>Volver</span>
           </button>
         </div>
 
-        <p className="link-text">
+        <p className="auth-footer">
           ¿No tienes cuenta?{" "}
-          <span className="link" onClick={() => navigate("/register")}>
+          <span className="auth-link" onClick={() => navigate("/register")}>
             Regístrate aquí
           </span>
         </p>
@@ -146,27 +172,20 @@ export function Login() {
   );
 }
 
-// ============================================
-// REGISTRO
-// ============================================
+// REGISTER
 export function Register() {
   const navigate = useNavigate();
+  const { registerWithEmail, loginWithGoogle } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const generateUserId = () => {
-    return 'user_' + Math.random().toString(36).substr(2, 9);
-  };
-
-  const generatePartnerCode = () => {
-    return Math.random().toString(36).substr(2, 8).toUpperCase();
-  };
-
-  const handleRegister = () => {
-    // Validaciones
+  const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
       setError("Por favor completa todos los campos");
       return;
@@ -182,104 +201,133 @@ export function Register() {
       return;
     }
 
-    // Verificar si el email ya existe
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    if (users.find(u => u.email === email)) {
-      setError("Este email ya está registrado");
-      return;
+    try {
+      setLoading(true);
+      setError("");
+      const result = await registerWithEmail(name, email, password);
+      if (result) {
+        alert("Cuenta creada exitosamente!");
+        navigate("/app/home");
+      }
+    } catch (error) {
+      console.error("Error en registro:", error);
+      if (error.code === "auth/email-already-in-use") {
+        setError("Este email ya está registrado");
+      } else if (error.code === "auth/invalid-email") {
+        setError("Email inválido");
+      } else if (error.code === "auth/weak-password") {
+        setError("La contraseña es muy débil");
+      } else {
+        setError("Error al registrarse: " + error.message);
+      }
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Crear nuevo usuario
-    const newUser = {
-      id: generateUserId(),
-      name: name,
-      email: email,
-      password: password,
-      partnerCode: generatePartnerCode(),
-      partnerId: null,
-      partnerName: null,
-      createdAt: new Date().toISOString()
-    };
-
-    // Guardar usuario
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-    localStorage.setItem("currentUser", JSON.stringify(newUser));
-
-    setError("");
-    alert("✅ Cuenta creada exitosamente!");
-    navigate("/auth"); // Ir a conectar pareja
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      await loginWithGoogle();
+      navigate("/auth");
+    } catch (error) {
+      setError("Error al continuar con Google");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="page auth-page">
-      <div className="auth-container">
-        <h1 className="title">Crear cuenta</h1>
-        <p className="auth-description">
-          Únete a WeTalk y fortalece tu relación
-        </p>
+    <div className="auth-page">
+      <div className="auth-content">
+        <h1 className="auth-title">Crear cuenta</h1>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="auth-error">{error}</div>}
 
         <div className="auth-form">
-          <div className="input-group">
-            <User size={20} color="#888" />
+          <div className="input-wrapper">
+            <User className="input-icon" size={20} />
             <input
-              className="input"
+              className="auth-input"
               type="text"
               placeholder="Tu nombre"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={loading}
             />
           </div>
 
-          <div className="input-group">
-            <Mail size={20} color="#888" />
+          <div className="input-wrapper">
+            <Mail className="input-icon" size={20} />
             <input
-              className="input"
+              className="auth-input"
               type="email"
               placeholder="Correo electrónico"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
 
-          <div className="input-group">
-            <Lock size={20} color="#888" />
+          <div className="input-wrapper">
+            <Lock className="input-icon" size={20} />
             <input
-              className="input"
-              type="password"
+              className="auth-input"
+              type={showPassword ? "text" : "password"}
               placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
+            <button 
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              type="button"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
 
-          <div className="input-group">
-            <Lock size={20} color="#888" />
+          <div className="input-wrapper">
+            <Lock className="input-icon" size={20} />
             <input
-              className="input"
-              type="password"
+              className="auth-input"
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirmar contraseña"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleRegister()}
+              disabled={loading}
             />
+            <button 
+              className="password-toggle"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              type="button"
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
         </div>
 
-        <div className="buttons">
-          <button className="btn primary" onClick={handleRegister}>
-            Crear cuenta
+        <div className="auth-buttons">
+          <button className="auth-btn primary-btn" onClick={handleRegister} disabled={loading}>
+            <span>{loading ? "Cargando..." : "Continuar"}</span>
           </button>
 
-          <button className="btn secondary" onClick={() => navigate("/auth")}>
-            Volver
+          <button className="auth-btn google-btn" onClick={handleGoogleLogin} disabled={loading}>
+            <Lock size={20} />
+            <span>Continuar con Google</span>
+          </button>
+
+          <button className="auth-btn tertiary-btn" onClick={() => navigate("/auth")} disabled={loading}>
+            <span>Volver</span>
           </button>
         </div>
 
-        <p className="link-text">
+        <p className="auth-footer">
           ¿Ya tienes cuenta?{" "}
-          <span className="link" onClick={() => navigate("/login")}>
+          <span className="auth-link" onClick={() => navigate("/login")}>
             Inicia sesión
           </span>
         </p>
@@ -288,142 +336,110 @@ export function Register() {
   );
 }
 
-// ============================================
 // CONECTAR CON PAREJA
-// ============================================
 function ConnectPartner() {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState(null);
+  const { userProfile, connectWithPartner, logout } = useAuth();
   const [partnerCode, setPartnerCode] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    if (user) {
-      setCurrentUser(user);
-      
-      // Si ya tiene pareja, ir a la app
-      if (user.partnerId) {
-        navigate("/app/home");
-      }
+    if (userProfile?.partnerId) {
+      navigate("/app/home");
     }
-  }, [navigate]);
+  }, [userProfile, navigate]);
 
   const copyCode = () => {
-    navigator.clipboard.writeText(currentUser.partnerCode);
+    navigator.clipboard.writeText(userProfile.partnerCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const connectWithPartner = () => {
+  const handleConnect = async () => {
     if (!partnerCode) {
       setError("Por favor ingresa un código");
       return;
     }
 
-    // Buscar pareja por código
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const partner = users.find(u => u.partnerCode === partnerCode.toUpperCase());
-
-    if (!partner) {
-      setError("Código inválido. Verifica con tu pareja.");
-      return;
+    try {
+      setLoading(true);
+      setError("");
+      const partner = await connectWithPartner(partnerCode);
+      alert(`Conectado con ${partner.name}!`);
+      navigate("/app/home");
+    } catch (error) {
+      setError(error.message || "Error al conectar. Verifica el código.");
+    } finally {
+      setLoading(false);
     }
-
-    if (partner.id === currentUser.id) {
-      setError("No puedes conectarte contigo mismo 😅");
-      return;
-    }
-
-    if (partner.partnerId) {
-      setError("Esta persona ya tiene pareja conectada");
-      return;
-    }
-
-    // Conectar parejas
-    const updatedUsers = users.map(u => {
-      if (u.id === currentUser.id) {
-        return { ...u, partnerId: partner.id, partnerName: partner.name };
-      }
-      if (u.id === partner.id) {
-        return { ...u, partnerId: currentUser.id, partnerName: currentUser.name };
-      }
-      return u;
-    });
-
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    
-    const updatedCurrentUser = updatedUsers.find(u => u.id === currentUser.id);
-    localStorage.setItem("currentUser", JSON.stringify(updatedCurrentUser));
-
-    alert(`💜 ¡Conectado con ${partner.name}!`);
-    navigate("/app/home");
   };
 
-  const skipConnection = () => {
-    navigate("/app/home");
+  const handleLogout = async () => {
+    if (window.confirm("¿Seguro que quieres cerrar sesión?")) {
+      await logout();
+      navigate("/auth");
+    }
   };
 
-  if (!currentUser) {
-    return null;
-  }
+  if (!userProfile) return null;
 
   return (
-    <div className="page auth-page">
-      <div className="auth-container connect-container">
-        <div className="auth-icon-container">
-          <Users size={64} color="#b84dff" />
+    <div className="auth-page">
+      <div className="auth-content">
+        <div className="heart-container small">
+          <Heart className="heart-icon" size={60} strokeWidth={2} />
         </div>
 
-        <h1 className="title">Conectar con tu pareja</h1>
-        <p className="auth-description">
-          ¡Hola {currentUser.name}! 👋
-        </p>
+        <h1 className="auth-title">Conectar con tu pareja</h1>
+        <p className="auth-subtitle">Hola {userProfile.name}</p>
 
-        {/* TU CÓDIGO */}
-        <div className="code-section">
-          <h3 className="section-title">Tu código de conexión</h3>
-          <p className="section-description">
+        <div className="code-card">
+          <h3 className="code-title">Tu código de conexión</h3>
+          <p className="code-description">
             Comparte este código con tu pareja
           </p>
           
-          <div className="code-display">
-            <span className="code-text">{currentUser.partnerCode}</span>
-            <button className="copy-btn" onClick={copyCode}>
-              {copied ? <Check size={20} /> : <Copy size={20} />}
+          <div className="code-display-box">
+            <span className="code-text">{userProfile.partnerCode}</span>
+            <button className="code-copy-btn" onClick={copyCode}>
+              {copied ? <Check size={24} /> : <Copy size={24} />}
             </button>
           </div>
         </div>
 
-        {/* CONECTAR CON CÓDIGO */}
-        <div className="code-section">
-          <h3 className="section-title">¿Tu pareja ya tiene código?</h3>
-          <p className="section-description">
-            Ingresa su código para conectarse
-          </p>
+        <div className="code-card">
+          <h3 className="code-title">¿Tu pareja ya tiene código?</h3>
+          
+          {error && <div className="auth-error">{error}</div>}
 
-          {error && <div className="error-message">{error}</div>}
-
-          <div className="input-group">
+          <div className="input-wrapper">
             <input
-              className="input code-input"
+              className="auth-input code-input"
               type="text"
-              placeholder="Código de tu pareja"
+              placeholder="Ingresa el código"
               value={partnerCode}
               onChange={(e) => setPartnerCode(e.target.value.toUpperCase())}
+              onKeyPress={(e) => e.key === "Enter" && handleConnect()}
               maxLength={8}
+              disabled={loading}
             />
           </div>
 
-          <button className="btn primary" onClick={connectWithPartner}>
+          <button className="auth-btn primary-btn" onClick={handleConnect} disabled={loading}>
             <Heart size={20} />
-            Conectar
+            <span>{loading ? "Conectando..." : "Conectar"}</span>
           </button>
         </div>
 
-        <button className="btn-link" onClick={skipConnection}>
-          Conectar después
+        <button className="auth-btn tertiary-btn" onClick={() => navigate("/app/home")}>
+          <span>Continuar sin pareja</span>
+        </button>
+
+        <button className="auth-btn logout-btn" onClick={handleLogout}>
+          <LogOut size={20} />
+          <span>Cerrar sesión</span>
         </button>
       </div>
     </div>

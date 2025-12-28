@@ -1,6 +1,54 @@
 import { useState, useEffect } from "react";
-import { Heart, Target, Calendar, Camera, BookOpen, Gamepad2, Star, Bell, AlertCircle, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {
+  Heart,
+  Target,
+  Calendar,
+  Camera,
+  BookOpen,
+  Gamepad2,
+  Star,
+  Bell,
+  TrendingUp,
+  Users,
+  AlertCircle,
+  MessageCircle,
+  Smile,
+  Frown,
+  Meh,
+  HeartCrack,
+  Zap,
+  Copy,
+  Check
+} from "lucide-react";
+import "./HomeApp.css";
+
+// 🧹 Función para limpiar localStorage corrupto
+function cleanCorruptedLocalStorage() {
+  try {
+    const keys = ['todayMood', 'moodDate', 'adviceRead'];
+    keys.forEach(key => {
+      const value = localStorage.getItem(key);
+      if (value && key === 'todayMood') {
+        try {
+          const parsed = JSON.parse(value);
+          if (!parsed.iconName || typeof parsed.iconName !== 'string') {
+            throw new Error('Invalid mood structure');
+          }
+        } catch {
+          console.log(`🧹 Limpiando ${key} corrupto`);
+          localStorage.removeItem(key);
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error en limpieza:', error);
+  }
+}
+
+// Ejecutar limpieza al cargar
+cleanCorruptedLocalStorage();
 
 export default function HomeApp() {
   const [showModal, setShowModal] = useState(false);
@@ -9,40 +57,53 @@ export default function HomeApp() {
   const [shouldAskMood, setShouldAskMood] = useState(true);
   const [showMoodIcon, setShowMoodIcon] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
+  const { userProfile, getPartnerProfile } = useAuth();
+  const partner = getPartnerProfile();
   const navigate = useNavigate();
 
+  // Mapeo de iconos para moods
+  const iconMap = {
+    Smile,
+    Frown,
+    Zap,
+    Heart,
+    HeartCrack,
+    Meh
+  };
+
+  // Moods guardamos solo iconName
   const moods = [
-    { 
-      emoji: "😊", 
-      name: "Feliz", 
-      color: "#FFD700",
+    {
+      iconName: "Smile",
+      name: "Feliz",
+      color: "#10B981",
       advice: "¡Qué bien! Aprovecha esta energía para compartir momentos especiales con tu pareja.",
       tip: "Hoy es un buen día para expresar tu amor y gratitud."
     },
-    { 
-      emoji: "😔", 
-      name: "Triste", 
+    {
+      iconName: "Frown",
+      name: "Triste",
       color: "#6B7280",
       advice: "Está bien sentirse así. Habla con tu pareja, el apoyo mutuo fortalece la relación.",
       tip: "La comunicación abierta es clave en los momentos difíciles."
     },
-    { 
-      emoji: "😰", 
-      name: "Ansioso/a", 
+    {
+      iconName: "Zap",
+      name: "Ansioso",
       color: "#EF4444",
       advice: "Respira profundo. Comparte tus preocupaciones, la comunicación reduce la ansiedad.",
       tip: "Recuerda: juntos pueden superar cualquier desafío."
     },
-    { 
-      emoji: "😍", 
-      name: "Enamorado/a", 
+    {
+      iconName: "Heart",
+      name: "Enamorado",
       color: "#EC4899",
       advice: "¡Hermoso sentimiento! Exprésalo sin miedo. El amor crece cuando se comparte.",
       tip: "Un mensaje cariñoso puede alegrar el día de tu pareja."
     },
-    { 
-      emoji: "😤", 
-      name: "Frustrado/a", 
+    {
+      iconName: "HeartCrack",
+      name: "Frustrado",
       color: "#F97316",
       advice: "Es normal sentir frustración. Tómate un momento antes de hablar.",
       tip: "La paciencia y el respeto son fundamentales en toda relación."
@@ -50,105 +111,126 @@ export default function HomeApp() {
   ];
 
   const features = [
-    { 
-      id: "love-messages", 
-      icon: Heart, 
-      title: "Mensajes de Amor", 
-      description: "Envía un mensaje dulce diario",
-      color: "#EC4899",
+    {
+      id: "love-messages",
+      Icon: Heart,
+      title: "Mensajes de Amor",
+      description: "Envía un mensaje dulce",
       gradient: "linear-gradient(135deg, #EC4899, #F472B6)"
     },
-    { 
-      id: "challenges", 
-      icon: Target, 
-      title: "Retos de Pareja", 
+    {
+      id: "challenges",
+      Icon: Target,
+      title: "Retos de Pareja",
       description: "Completa retos juntos",
-      color: "#8B5CF6",
       gradient: "linear-gradient(135deg, #8B5CF6, #A78BFA)"
     },
-    { 
-      id: "calendar", 
-      icon: Calendar, 
-      title: "Fechas Importantes", 
+    {
+      id: "calendar",
+      Icon: Calendar,
+      title: "Fechas Importantes",
       description: "Nunca olvides un momento",
-      color: "#3B82F6",
       gradient: "linear-gradient(135deg, #3B82F6, #60A5FA)"
     },
-    { 
-      id: "gallery", 
-      icon: Camera, 
-      title: "Galería de Recuerdos", 
-      description: "Momentos especiales juntos",
-      color: "#F59E0B",
+    {
+      id: "gallery",
+      Icon: Camera,
+      title: "Galería",
+      description: "Momentos especiales",
       gradient: "linear-gradient(135deg, #F59E0B, #FBBF24)"
     },
-    { 
-      id: "diary", 
-      icon: BookOpen, 
-      title: "Diario Compartido", 
+    {
+      id: "diary",
+      Icon: BookOpen,
+      title: "Diario Compartido",
       description: "Escribe sus historias",
-      color: "#10B981",
       gradient: "linear-gradient(135deg, #10B981, #34D399)"
     },
-    { 
-      id: "games", 
-      icon: Gamepad2, 
-      title: "Juegos de Pareja", 
+    {
+      id: "games",
+      Icon: Gamepad2,
+      title: "Juegos",
       description: "Diviértanse juntos",
-      color: "#EF4444",
       gradient: "linear-gradient(135deg, #EF4444, #F87171)"
     },
-    { 
-      id: "wishlist", 
-      icon: Star, 
-      title: "Buzón de Deseos", 
+    {
+      id: "wishlist",
+      Icon: Star,
+      title: "Buzón de Deseos",
       description: "Sueños por cumplir",
-      color: "#F59E0B",
       gradient: "linear-gradient(135deg, #FBBF24, #FCD34D)"
     },
-    { 
-      id: "reminders", 
-      icon: Bell, 
-      title: "Recordatorios", 
-      description: "Detalles que importan",
-      color: "#06B6D4",
+    {
+      id: "reminders",
+      Icon: Bell,
+      title: "Recordatorios",
+      description: "Detalles importantes",
       gradient: "linear-gradient(135deg, #06B6D4, #22D3EE)"
     },
-    { 
-      id: "stats", 
-      icon: TrendingUp, 
-      title: "Estadísticas", 
+    {
+      id: "stats",
+      Icon: TrendingUp,
+      title: "Estadísticas",
       description: "Tu relación en números",
-      color: "#8B5CF6",
       gradient: "linear-gradient(135deg, #6366F1, #818CF8)"
     },
   ];
 
   useEffect(() => {
-    const savedMood = localStorage.getItem("todayMood");
-    const savedDate = localStorage.getItem("moodDate");
-    const adviceRead = localStorage.getItem("adviceRead");
-    const today = new Date().toDateString();
+    try {
+      const savedMood = localStorage.getItem("todayMood");
+      const savedDate = localStorage.getItem("moodDate");
+      const adviceRead = localStorage.getItem("adviceRead");
+      const today = new Date().toDateString();
 
-    if (savedMood && savedDate === today) {
-      setTodayMood(JSON.parse(savedMood));
-      setShouldAskMood(false);
-      
-      if (adviceRead === "true") {
-        setShowMoodIcon(true);
-      } else {
-        setShowAdvice(true);
+      if (savedMood) {
+        try {
+          const mood = JSON.parse(savedMood);
+          
+          if (!mood.iconName || !mood.name || !mood.color) {
+            console.log("🧹 Limpiando datos corruptos de mood...");
+            localStorage.removeItem("todayMood");
+            localStorage.removeItem("moodDate");
+            localStorage.removeItem("adviceRead");
+            return;
+          }
+
+          if (savedDate === today) {
+            setTodayMood(mood);
+            setShouldAskMood(false);
+
+            if (adviceRead === "true") {
+              setShowMoodIcon(true);
+            } else {
+              setShowAdvice(true);
+            }
+          } else {
+            console.log("🧹 Limpiando mood de días anteriores...");
+            localStorage.removeItem("todayMood");
+            localStorage.removeItem("moodDate");
+            localStorage.removeItem("adviceRead");
+          }
+        } catch (parseError) {
+          console.log("🧹 Error parseando mood, limpiando...");
+          localStorage.removeItem("todayMood");
+          localStorage.removeItem("moodDate");
+          localStorage.removeItem("adviceRead");
+        }
       }
+    } catch (error) {
+      console.error("❌ Error general cargando mood:", error);
+      localStorage.removeItem("todayMood");
+      localStorage.removeItem("moodDate");
+      localStorage.removeItem("adviceRead");
     }
   }, []);
 
   const handleMoodSelect = (mood) => {
     const today = new Date().toDateString();
-    
     localStorage.setItem("todayMood", JSON.stringify(mood));
     localStorage.setItem("moodDate", today);
     localStorage.removeItem("adviceRead");
-    
+
     setTodayMood(mood);
     setShouldAskMood(false);
     setShowModal(false);
@@ -162,80 +244,114 @@ export default function HomeApp() {
   };
 
   return (
-  <div className="screen home-screen">
-    <div className="home-header">
-      
-      <h1 className="title">WeTalk</h1>
-      <p className="subtitle">Tu espacio de conexión 💜</p>
-    </div>
-
-      {shouldAskMood && (
-        <div className="mood-section">
-          <button 
-            className="mood-compact-btn" 
-            onClick={() => setShowModal(true)}
-          >
-            <span className="mood-icon">💭</span>
-            <div className="mood-text-container">
-              <span className="mood-label">¿Cómo te sientes hoy?</span>
-              <span className="mood-sublabel">Toca para contarnos</span>
+    <div className="screen home-screen">
+      {/* Header Profesional */}
+      <div className="home-header-new">
+        <div className="user-info">
+          <h1 className="user-greeting">Hola, {userProfile?.name || "Usuario"}</h1>
+          {partner ? (
+            <div className="partner-status">
+              <Users size={16} />
+              <span>Conectado con {partner.name}</span>
             </div>
-          </button>
+          ) : (
+            <div className="partner-status disconnected">
+              <Users size={16} />
+              <span>Sin pareja conectada</span>
+            </div>
+          )}
+        </div>
+        <div className="points-badge">
+          <Star size={18} />
+          <span>{userProfile?.points || 0}</span>
+        </div>
+      </div>
+
+      {/* Botón de Mood */}
+      {shouldAskMood && (
+        <div className="mood-card-new" onClick={() => setShowModal(true)}>
+          <div className="mood-card-icon">
+            <MessageCircle size={28} strokeWidth={2} />
+          </div>
+          <div className="mood-card-content">
+            <h3 className="mood-card-title">¿Cómo te sientes hoy?</h3>
+            <p className="mood-card-subtitle">Toca para contarnos</p>
+          </div>
         </div>
       )}
 
-      <button 
-        className="sos-button"
-        onClick={() => setActiveFeature('sos')}
-      >
-        <AlertCircle size={24} />
-        <span>Modo SOS</span>
-        <span className="sos-subtitle">¿Necesitas ayuda?</span>
+      {/* Botón SOS */}
+      <button className="sos-card-new" onClick={() => setActiveFeature('sos')}>
+        <div className="sos-card-icon">
+          <AlertCircle size={28} strokeWidth={2} />
+        </div>
+        <div className="sos-card-content">
+          <h3 className="sos-card-title">Modo SOS</h3>
+          <p className="sos-card-subtitle">¿Necesitas ayuda?</p>
+        </div>
       </button>
 
-      <div className="features-grid">
-        {features.map((feature) => {
-          const IconComponent = feature.icon;
+      {/* Grid de funciones */}
+      <div className="features-grid-new">
+        {features.map((feature, index) => {
+          const IconComponent = feature.Icon;
+          if (!IconComponent) return null;
+          
           return (
-            <div 
+            <div
               key={feature.id}
-              className="feature-card"
+              className="feature-card-new"
               onClick={() => setActiveFeature(feature.id)}
-              style={{ background: feature.gradient }}
+              style={{
+                background: feature.gradient,
+                animationDelay: `${index * 0.05}s`
+              }}
             >
-              <IconComponent size={32} color="white" strokeWidth={2.5} />
-              <h3>{feature.title}</h3>
-              <p>{feature.description}</p>
+              <div className="feature-icon-wrapper">
+                <IconComponent size={36} color="white" strokeWidth={2.5} />
+              </div>
+              <h3 className="feature-card-title">{feature.title}</h3>
+              <p className="feature-card-description">{feature.description}</p>
             </div>
           );
         })}
       </div>
 
-      {showMoodIcon && todayMood && (
-        <div className="floating-mood" onClick={() => setShowAdvice(true)}>
-          <span className="floating-emoji">{todayMood.emoji}</span>
-          <span className="floating-label">Ver consejo</span>
+      {/* Icono flotante de mood */}
+      {showMoodIcon && todayMood && todayMood.iconName && iconMap[todayMood.iconName] && (
+        <div className="floating-mood-new" onClick={() => setShowAdvice(true)}>
+          {(() => {
+            const MoodIcon = iconMap[todayMood.iconName];
+            return <MoodIcon size={24} color="white" />;
+          })()}
+          <span>Ver consejo</span>
         </div>
       )}
 
+      {/* Modal de selección de mood */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal mood-modal-new" onClick={(e) => e.stopPropagation()}>
             <h2 className="modal-title">¿Cómo te sientes hoy?</h2>
             <p className="modal-subtitle">Selecciona tu estado de ánimo</p>
-            
-            <div className="moods">
-              {moods.map((mood) => (
-                <button
-                  key={mood.name}
-                  className="mood-btn"
-                  onClick={() => handleMoodSelect(mood)}
-                  style={{ borderLeft: `4px solid ${mood.color}` }}
-                >
-                  <span className="mood-emoji">{mood.emoji}</span>
-                  <span className="mood-name-text">{mood.name}</span>
-                </button>
-              ))}
+
+            <div className="moods-grid-new">
+              {moods.map((mood) => {
+                const MoodIcon = iconMap[mood.iconName];
+                if (!MoodIcon) return null;
+                
+                return (
+                  <button
+                    key={mood.name}
+                    className="mood-btn-new"
+                    onClick={() => handleMoodSelect(mood)}
+                    style={{ borderColor: mood.color }}
+                  >
+                    <MoodIcon size={32} color={mood.color} strokeWidth={2} />
+                    <span>{mood.name}</span>
+                  </button>
+                );
+              })}
             </div>
 
             <button className="close-modal" onClick={() => setShowModal(false)}>
@@ -245,396 +361,70 @@ export default function HomeApp() {
         </div>
       )}
 
-      {showAdvice && todayMood && (
-        <div className="modal-overlay">
-          <div className="modal advice-modal" onClick={(e) => e.stopPropagation()}>
-            <div 
-              className="mood-badge-modal" 
+      {/* Modal de consejo */}
+      {showAdvice && todayMood && todayMood.iconName && iconMap[todayMood.iconName] && (
+        <div className="modal-overlay" onClick={handleAdviceClose}>
+          <div className="modal advice-modal-new" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="advice-badge"
               style={{ background: `linear-gradient(135deg, ${todayMood.color}, ${todayMood.color}99)` }}
             >
-              <span className="mood-emoji-big">{todayMood.emoji}</span>
-              <h2 className="mood-name-big">{todayMood.name}</h2>
+              {(() => {
+                const MoodIcon = iconMap[todayMood.iconName];
+                return <MoodIcon size={48} color="white" strokeWidth={2} />;
+              })()}
+              <h2>{todayMood.name}</h2>
             </div>
 
-            <div className="advice-content">
-              <h3>💜 Consejo del día</h3>
+            <div className="advice-content-new">
+              <h3>Consejo del día</h3>
               <p>{todayMood.advice}</p>
             </div>
 
-            <div className="tip-content">
-              <span className="tip-icon">💡</span>
+            <div className="tip-content-new">
+              <div className="tip-icon-new">
+                <Star size={20} color="#b84dff" />
+              </div>
               <p>{todayMood.tip}</p>
             </div>
 
             <button className="btn primary" onClick={handleAdviceClose}>
-              ¡Listo!
+              Listo
             </button>
           </div>
         </div>
       )}
 
-      {activeFeature && (
-        <FeatureModal 
-          featureId={activeFeature} 
-          onClose={() => setActiveFeature(null)} 
-        />
-      )}
-    </div>
-  );
-}
-
-
-
-// ============================================
-// COMPONENTE DE MODAL DE FUNCIONES
-// ============================================
-
-function FeatureModal({ featureId, onClose }) {
-  if (featureId === 'sos') {
-    return <SOSMode onClose={onClose} />;
-  }
-
-  if (featureId === 'love-messages') {
-    return <LoveMessages onClose={onClose} />;
-  }
-
-  if (featureId === 'challenges') {
-    return <Challenges onClose={onClose} />;
-  }
-
-  // Para las demás funciones (pronto las implementaremos)
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal feature-modal" onClick={(e) => e.stopPropagation()}>
-        <h2 className="modal-title">En desarrollo</h2>
-        <p className="modal-subtitle">Esta función estará disponible pronto 🚀</p>
-        <button className="btn primary" onClick={onClose}>
-          Volver
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ============================================
-// 🆘 MODO SOS
-// ============================================
-
-function SOSMode({ onClose }) {
-  const [step, setStep] = useState('menu');
-  const [breathCount, setBreathCount] = useState(0);
-  const [pauseMinutes, setPauseMinutes] = useState(null);
-
-  const breathExercise = () => {
-    setStep('breathing');
-    setBreathCount(0);
-  };
-
-  const startPause = (minutes) => {
-    setPauseMinutes(minutes);
-    setStep('pause');
-    setTimeout(() => {
-      alert(`✅ Tiempo cumplido. ¿Están listos para hablar con calma?`);
-      setStep('menu');
-    }, minutes * 60 * 1000);
-  };
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal sos-modal" onClick={(e) => e.stopPropagation()}>
-        {step === 'menu' && (
-          <>
-            <div className="sos-header">
-              <AlertCircle size={48} color="#EF4444" />
-              <h2 className="modal-title">Modo SOS 🆘</h2>
-              <p className="modal-subtitle">Respira, todo tiene solución</p>
-            </div>
-
-            <div className="sos-options">
-              <button className="sos-option" onClick={breathExercise}>
-                <span className="sos-emoji">🫁</span>
-                <div>
-                  <strong>Ejercicio de Respiración</strong>
-                  <p>Cálmate con respiración guiada</p>
-                </div>
-              </button>
-
-              <button className="sos-option" onClick={() => setStep('tips')}>
-                <span className="sos-emoji">💬</span>
-                <div>
-                  <strong>Frases para Comunicar</strong>
-                  <p>Cómo expresarte sin atacar</p>
-                </div>
-              </button>
-
-              <button className="sos-option" onClick={() => setStep('pause-select')}>
-                <span className="sos-emoji">⏸️</span>
-                <div>
-                  <strong>Tomar una Pausa</strong>
-                  <p>Tiempo para reflexionar</p>
-                </div>
-              </button>
-
-              <button className="sos-option" onClick={() => setStep('reconciliation')}>
-                <span className="sos-emoji">🤝</span>
-                <div>
-                  <strong>Iniciar Reconciliación</strong>
-                  <p>Mensajes para hacer las paces</p>
-                </div>
-              </button>
-            </div>
-
-            <button className="btn secondary" onClick={onClose}>
+      {/* Modales */}
+      {activeFeature && activeFeature !== 'sos' && activeFeature !== 'love-messages' && activeFeature !== 'challenges' && (
+        <div className="modal-overlay" onClick={() => setActiveFeature(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-title">En desarrollo</h2>
+            <p className="modal-subtitle">Esta función estará disponible pronto</p>
+            <button className="btn primary" onClick={() => setActiveFeature(null)}>
               Cerrar
             </button>
-          </>
-        )}
+          </div>
+        </div>
+      )}
 
-        {step === 'breathing' && (
-          <BreathingExercise onComplete={() => setStep('menu')} />
-        )}
-
-        {step === 'tips' && (
-          <CommunicationTips onBack={() => setStep('menu')} />
-        )}
-
-        {step === 'pause-select' && (
-          <>
-            <h2 className="modal-title">¿Cuánto tiempo necesitan?</h2>
-            <p className="modal-subtitle">Tómense un tiempo para calmarse</p>
-            
-            <div className="pause-options">
-              <button className="pause-btn" onClick={() => startPause(5)}>
-                5 minutos
-              </button>
-              <button className="pause-btn" onClick={() => startPause(15)}>
-                15 minutos
-              </button>
-              <button className="pause-btn" onClick={() => startPause(30)}>
-                30 minutos
-              </button>
-            </div>
-
-            <button className="btn secondary" onClick={() => setStep('menu')}>
-              Volver
-            </button>
-          </>
-        )}
-
-        {step === 'pause' && (
-          <>
-            <h2 className="modal-title">⏸️ Pausa Activa</h2>
-            <p className="pause-text">
-              Tómense {pauseMinutes} minutos para calmarse.<br/>
-              Respiren, piensen en lo que quieren decir.<br/>
-              Los notificaremos cuando termine el tiempo.
-            </p>
-            <div className="pause-timer">
-              ⏱️ {pauseMinutes} min
-            </div>
-            <button className="btn secondary" onClick={() => setStep('menu')}>
-              Cancelar pausa
-            </button>
-          </>
-        )}
-
-        {step === 'reconciliation' && (
-          <ReconciliationMessages onBack={() => setStep('menu')} />
-        )}
-      </div>
+      {activeFeature === 'sos' && <SOSMode onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'love-messages' && <LoveMessages onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'challenges' && <Challenges onClose={() => setActiveFeature(null)} />}
     </div>
   );
 }
 
-function BreathingExercise({ onComplete }) {
-  const [phase, setPhase] = useState('inhale');
-  const [count, setCount] = useState(4);
-  const [cycles, setCycles] = useState(0);
-
-  useEffect(() => {
-    if (cycles >= 3) {
-      setTimeout(onComplete, 2000);
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setCount(prev => {
-        if (prev === 1) {
-          if (phase === 'inhale') {
-            setPhase('hold');
-            return 4;
-          } else if (phase === 'hold') {
-            setPhase('exhale');
-            return 4;
-          } else {
-            setCycles(c => c + 1);
-            setPhase('inhale');
-            return 4;
-          }
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [phase, cycles, onComplete]);
-
-  const phaseText = {
-    inhale: 'Inhala profundamente',
-    hold: 'Mantén el aire',
-    exhale: 'Exhala lentamente'
-  };
-
-  return (
-    <div className="breathing-container">
-      <div className={`breathing-circle ${phase}`}>
-        <span className="breath-count">{count}</span>
-      </div>
-      <h3 className="breath-text">{phaseText[phase]}</h3>
-      <p className="breath-cycle">Ciclo {cycles + 1} de 3</p>
-    </div>
-  );
-}
-
-function CommunicationTips({ onBack }) {
-  const tips = [
-    '"Me siento _____ cuando _____"',
-    '"Necesito que entiendas que _____"',
-    '"¿Podemos hablar de _____ con calma?"',
-    '"Esto me duele porque _____"',
-    '"Te amo, pero necesito que _____"',
-    '"Entiendo tu punto, pero yo siento _____"'
-  ];
-
-  return (
-    <>
-      <h2 className="modal-title">💬 Frases para Comunicar</h2>
-      <p className="modal-subtitle">Usa estas frases para expresarte mejor</p>
-      
-      <div className="tips-list">
-        {tips.map((tip, i) => (
-          <div key={i} className="tip-item">
-            <span className="tip-number">{i + 1}</span>
-            <p>{tip}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="sos-reminder">
-        <strong>Recuerda:</strong> Habla desde el "yo", no desde el "tú". 
-        Evita culpar, mejor expresa cómo te sientes.
-      </div>
-
-      <button className="btn primary" onClick={onBack}>
-        Volver
-      </button>
-    </>
-  );
-}
-
-function ReconciliationMessages({ onBack }) {
-  const messages = [
-    "Siento mucho lo que pasó. ¿Podemos hablar?",
-    "Te amo y no quiero pelear. Hablemos con calma.",
-    "Lamento si te lastimé. No era mi intención.",
-    "Sé que ambos estamos molestos, pero podemos solucionarlo.",
-    "Eres importante para mí. No quiero que esto nos separe.",
-  ];
-
-  const copyMessage = (msg) => {
-    navigator.clipboard.writeText(msg);
-    alert("✅ Mensaje copiado. Ahora envíaselo 💜");
-  };
-
-  return (
-    <>
-      <h2 className="modal-title">🤝 Mensajes de Reconciliación</h2>
-      <p className="modal-subtitle">Copia y envía uno de estos mensajes</p>
-      
-      <div className="reconciliation-list">
-        {messages.map((msg, i) => (
-          <div key={i} className="reconciliation-item" onClick={() => copyMessage(msg)}>
-            <p>{msg}</p>
-            <span className="copy-icon">📋</span>
-          </div>
-        ))}
-      </div>
-
-      <button className="btn primary" onClick={onBack}>
-        Volver
-      </button>
-    </>
-  );
-}
-
-// ============================================
-// 💌 MENSAJES DE AMOR
-// ============================================
-
-function LoveMessages({ onClose }) {
-  const [todayMessage, setTodayMessage] = useState(null);
-
-  const messages = [
-    "Cada día contigo es un regalo que atesoro 💝",
-    "Tu sonrisa ilumina mis días más oscuros ☀️",
-    "Gracias por amarme tal como soy 💜",
-    "Contigo, el amor se siente como magia ✨",
-    "Eres mi lugar favorito en el mundo 🌍",
-    "No necesito más, te tengo a ti 💕",
-    "Mi corazón late más fuerte cuando estás cerca 💗",
-    "Eres la mejor decisión que he tomado 🎯",
-    "Tu amor me hace mejor persona cada día 🌱",
-    "Enamorarme de ti fue lo más fácil que he hecho 😍"
-  ];
-
-  useEffect(() => {
-    const saved = localStorage.getItem("todayLoveMessage");
-    const savedDate = localStorage.getItem("loveMessageDate");
-    const today = new Date().toDateString();
-
-    if (saved && savedDate === today) {
-      setTodayMessage(saved);
-    } else {
-      const random = messages[Math.floor(Math.random() * messages.length)];
-      setTodayMessage(random);
-      localStorage.setItem("todayLoveMessage", random);
-      localStorage.setItem("loveMessageDate", today);
-    }
-  }, []);
-
-  const copyMessage = () => {
-    navigator.clipboard.writeText(todayMessage);
-    alert("✅ Mensaje copiado! Ahora envíaselo a tu pareja 💜");
-  };
-
-  const newMessage = () => {
-    const random = messages[Math.floor(Math.random() * messages.length)];
-    setTodayMessage(random);
-    localStorage.setItem("todayLoveMessage", random);
-  };
-
+function SOSMode({ onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal love-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="love-header">
-          <Heart size={48} color="#EC4899" fill="#EC4899" />
-          <h2 className="modal-title">Mensaje de Amor del Día</h2>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <AlertCircle size={48} color="#EF4444" />
+          <h2 className="modal-title">Modo SOS</h2>
+          <p className="modal-subtitle">Funcionalidad en desarrollo</p>
         </div>
-
-        <div className="love-message-card">
-          <p className="love-message-text">{todayMessage}</p>
-        </div>
-
-        <div className="love-buttons">
-          <button className="btn primary" onClick={copyMessage}>
-            📋 Copiar Mensaje
-          </button>
-          <button className="btn secondary" onClick={newMessage}>
-            🔄 Otro Mensaje
-          </button>
-        </div>
-
-        <button className="close-modal" onClick={onClose}>
+        <button className="btn primary" onClick={onClose}>
           Cerrar
         </button>
       </div>
@@ -642,87 +432,120 @@ function LoveMessages({ onClose }) {
   );
 }
 
-// ============================================
-// 🎯 RETOS DE PAREJA
-// ============================================
-
-function Challenges({ onClose }) {
-  const [currentChallenge, setCurrentChallenge] = useState(null);
-  const [completedToday, setCompletedToday] = useState(false);
-
-  const challenges = [
-    { emoji: "🎤", text: "Envía un audio de 30 seg diciendo lo que amas de tu pareja", points: 10 },
-    { emoji: "💌", text: "Escribe una carta de amor a mano (o digital) y envíasela", points: 15 },
-    { emoji: "📸", text: "Tómense una selfie juntos y guárdenla en Recuerdos", points: 5 },
-    { emoji: "🍽️", text: "Planea una cita sorpresa para esta semana", points: 20 },
-    { emoji: "🎁", text: "Dale un detalle pequeño sin motivo", points: 10 },
-    { emoji: "💬", text: "Pregúntale sobre su día y ESCUCHA activamente", points: 5 },
-    { emoji: "🤗", text: "Dale un abrazo de 20 segundos (aumenta la oxitocina)", points: 5 },
-    { emoji: "☕", text: "Prepárale su bebida favorita sin que lo pida", points: 10 },
-    { emoji: "📱", text: "No uses el celular durante 1 hora estando juntos", points: 15 },
-    { emoji: "🌟", text: "Dile 3 cosas que admiras de él/ella", points: 10 }
-  ];
+// 🔥 LOVE MESSAGES CON FIRESTORE
+function LoveMessages({ onClose }) {
+  const [copied, setCopied] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const { userProfile, getPartnerProfile } = useAuth();
+  const [partner, setPartner] = useState(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("todayChallenge");
-    const savedDate = localStorage.getItem("challengeDate");
-    const completed = localStorage.getItem("challengeCompleted");
-    const today = new Date().toDateString();
-
-    if (saved && savedDate === today) {
-      setCurrentChallenge(JSON.parse(saved));
-      setCompletedToday(completed === "true");
-    } else {
-      const random = challenges[Math.floor(Math.random() * challenges.length)];
-      setCurrentChallenge(random);
-      localStorage.setItem("todayChallenge", JSON.stringify(random));
-      localStorage.setItem("challengeDate", today);
-      localStorage.removeItem("challengeCompleted");
-    }
+    loadPartner();
   }, []);
 
-  const completeChallenge = () => {
-    const totalPoints = parseInt(localStorage.getItem("totalPoints") || "0");
-    localStorage.setItem("totalPoints", (totalPoints + currentChallenge.points).toString());
-    localStorage.setItem("challengeCompleted", "true");
-    setCompletedToday(true);
-    alert(`🎉 ¡Reto completado! +${currentChallenge.points} puntos`);
+  const loadPartner = async () => {
+    const partnerData = await getPartnerProfile();
+    setPartner(partnerData);
+    loadTodayMessage(partnerData);
+  };
+
+  const loadTodayMessage = async (partnerData) => {
+    try {
+      setLoading(true);
+      
+      const { getTodayLoveMessage } = await import("../services/loveMessages");
+      
+      const userId = userProfile?.uid || "guest";
+      const userName = userProfile?.name || "Usuario";
+      const partnerName = partnerData?.name || "tu amor";
+      
+      const todayMessage = await getTodayLoveMessage(userId, userName, partnerName);
+      
+      setMessage(todayMessage);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error cargando mensaje:", error);
+      setMessage("Cada día contigo es un regalo que atesoro ❤️");
+      setLoading(false);
+    }
+  };
+
+  const copyMessage = () => {
+    navigator.clipboard.writeText(message);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal challenge-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="challenge-header">
-          <Target size={48} color="#8B5CF6" />
-          <h2 className="modal-title">Reto del Día</h2>
-          <div className="challenge-points">
-            🏆 {localStorage.getItem("totalPoints") || "0"} puntos totales
-          </div>
+      <div className="modal love-modal-new" onClick={(e) => e.stopPropagation()}>
+        <div className="love-header-new">
+          <Heart size={48} color="#EC4899" strokeWidth={2} />
+          <h2 className="modal-title">Mensaje de Amor del Día</h2>
+          <p className="modal-subtitle">Generado especialmente para ti ✨</p>
         </div>
 
-        {currentChallenge && (
-          <div className="challenge-card">
-            <span className="challenge-emoji">{currentChallenge.emoji}</span>
-            <p className="challenge-text">{currentChallenge.text}</p>
-            <div className="challenge-reward">
-              +{currentChallenge.points} puntos
+        {loading ? (
+          <div className="love-message-card-new" style={{ padding: '40px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <div style={{
+                width: '40px', height: '40px',
+                border: '4px solid rgba(255,255,255,0.3)',
+                borderTop: '4px solid white',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <p style={{ color: 'white', margin: 0 }}>Generando tu mensaje...</p>
             </div>
           </div>
-        )}
-
-        {!completedToday ? (
-          <button className="btn primary" onClick={completeChallenge}>
-            ✅ Marcar como completado
-          </button>
         ) : (
-          <div className="challenge-completed">
-            <span className="check-icon">✅</span>
-            <p>¡Reto completado hoy!</p>
-            <p className="challenge-next">Vuelve mañana para un nuevo reto</p>
-          </div>
+          <>
+            <div className="love-message-card-new">
+              <p>{message}</p>
+            </div>
+
+            <p style={{ color: '#888', fontSize: '13px', textAlign: 'center', margin: '10px 0' }}>
+              ✨ Mañana tendrás un nuevo mensaje
+            </p>
+
+            <button 
+              className="btn primary" 
+              onClick={copyMessage} 
+              disabled={loading}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+            >
+              {copied ? <Check size={20} /> : <Copy size={20} />}
+              <span>{copied ? "¡Copiado!" : "Copiar Mensaje"}</span>
+            </button>
+          </>
         )}
 
         <button className="close-modal" onClick={onClose}>
+          Cerrar
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function Challenges({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <Target size={48} color="#8B5CF6" strokeWidth={2} />
+          <h2 className="modal-title">Reto del Día</h2>
+        </div>
+        <p className="modal-subtitle">Funcionalidad en desarrollo</p>
+        <button className="btn primary" onClick={onClose}>
           Cerrar
         </button>
       </div>
