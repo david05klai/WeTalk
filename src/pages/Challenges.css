@@ -1,0 +1,740 @@
+.challenges-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.challenges-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 107, 157, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Header */
+.challenges-header {
+  margin-bottom: 32px;
+}
+
+.challenges-header h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.stats-bar {
+  display: flex;
+  gap: 12px;
+  background: var(--card-bg);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-icon {
+  font-size: 32px;
+}
+
+.stat-item > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Lista de retos */
+.challenges-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.challenge-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.challenge-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.challenge-card.completed {
+  opacity: 0.7;
+  border-color: #4ECDC4;
+  background: linear-gradient(135deg, var(--card-bg) 0%, rgba(78, 205, 196, 0.1) 100%);
+}
+
+.challenge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.challenge-category {
+  font-size: 32px;
+}
+
+.challenge-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.challenge-difficulty {
+  font-weight: 600;
+}
+
+.challenge-time {
+  color: var(--text-secondary);
+}
+
+.challenge-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.challenge-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.challenge-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.challenge-points {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFD700;
+}
+
+.points-icon {
+  font-size: 20px;
+}
+
+.btn-complete {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.btn-complete:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
+}
+
+.btn-complete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
+.completed-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(78, 205, 196, 0.2);
+  color: #4ECDC4;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.completed-badge svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Mensaje final */
+.all-completed-message {
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(135deg, rgba(78, 205, 196, 0.2), rgba(255, 107, 157, 0.2));
+  border-radius: 20px;
+  margin-top: 24px;
+}
+
+.celebration-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.all-completed-message h3 {
+  font-size: 24px;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.all-completed-message p {
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .challenges-container {
+    padding: 16px;
+  }
+
+  .stats-bar {
+    flex-direction: column;
+  }
+
+  .challenge-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .btn-complete {
+    width: 100%;
+  }
+}
+
+/* ===== HEADER TOP CON BOTÓN DE REGRESO ===== */
+.challenges-header-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-dark);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-btn-challenges {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.back-btn-challenges:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(-3px);
+}
+
+.challenges-header-top h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+/* ===== PARTNER NAME ===== */
+.partner-name-text {
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.partner-name-text strong {
+  color: #b84dff;
+  font-weight: 600;
+}
+
+/* ===== STATS BAR MEJORADO ===== */
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ===== CHALLENGE CARD HEADER ===== */
+.challenge-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.challenge-category-icon {
+  background: rgba(127, 0, 255, 0.15);
+  border: 1px solid rgba(127, 0, 255, 0.3);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.challenge-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.challenge-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #888;
+  font-size: 13px;
+}
+
+/* ===== COMPLETED BADGE ===== */
+.completed-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #10B981;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ===== ALL COMPLETED MESSAGE ===== */
+.all-completed-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 30px;
+  background: rgba(127, 0, 255, 0.1);
+  border: 2px solid rgba(127, 0, 255, 0.3);
+  border-radius: 20px;
+  margin: 20px;
+  text-align: center;
+}
+
+.all-completed-message h3 {
+  color: white;
+  font-size: 22px;
+  margin: 0;
+}
+
+.all-completed-message p {
+  color: #aaa;
+  margin: 0;
+  font-size: 15px;
+}
+
+/* ===== PROGRESS INFO ===== */
+.progress-info {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.progress-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(127, 0, 255, 0.1);
+  border: 1px solid rgba(127, 0, 255, 0.3);
+  padding: 10px 16px;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ===== CHALLENGE ACTIONS ===== */
+.challenge-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-view {
+  background: rgba(127, 0, 255, 0.15);
+  border: 1px solid rgba(127, 0, 255, 0.4);
+  color: #b84dff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-view:hover {
+  background: rgba(127, 0, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* ===== UNLOCK NEXT BLOCK ===== */
+.unlock-next-block {
+  margin: 30px 20px;
+  padding: 30px;
+  background: linear-gradient(135deg, rgba(127, 0, 255, 0.2), rgba(184, 77, 255, 0.2));
+  border: 2px solid rgba(127, 0, 255, 0.5);
+  border-radius: 24px;
+  text-align: center;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(127, 0, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(127, 0, 255, 0.7);
+  }
+}
+
+.unlock-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.unlock-message h3 {
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.unlock-message p {
+  color: #aaa;
+  font-size: 15px;
+  margin: 0;
+}
+
+.btn-unlock {
+  background: linear-gradient(135deg, #7f00ff, #b84dff);
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(127, 0, 255, 0.4);
+}
+
+.btn-unlock:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 35px rgba(127, 0, 255, 0.6);
+}
+
+.btn-unlock:active {
+  transform: scale(0.98);
+}
+
+/* ===== RESPONSE MODAL ===== */
+.response-modal {
+  max-width: 500px;
+  width: 90%;
+}
+
+.response-input,
+.response-textarea {
+  width: 100%;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-family: inherit;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.response-input:focus,
+.response-textarea:focus {
+  outline: none;
+  border-color: #7f00ff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.response-textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.response-input::placeholder,
+.response-textarea::placeholder {
+  color: #888;
+}
+
+/* ===== PHOTO UPLOAD ===== */
+.photo-upload-area {
+  margin: 20px 0;
+}
+
+.photo-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px;
+  background: rgba(127, 0, 255, 0.1);
+  border: 2px dashed rgba(127, 0, 255, 0.4);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.photo-upload-label:hover {
+  background: rgba(127, 0, 255, 0.15);
+  border-color: rgba(127, 0, 255, 0.6);
+  transform: scale(1.02);
+}
+
+.photo-upload-label span {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ===== VIEW RESPONSES MODAL ===== */
+.view-responses-modal {
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.responses-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.response-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.response-box h3 {
+  color: #b84dff;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.response-text {
+  color: white;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.response-photo {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== ALL COMPLETED MESSAGE ===== */
+.all-completed-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  background: linear-gradient(135deg, rgba(127, 0, 255, 0.2), rgba(184, 77, 255, 0.2));
+  border: 2px solid rgba(127, 0, 255, 0.5);
+  border-radius: 24px;
+  margin: 30px 20px;
+  text-align: center;
+  animation: celebrationPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes celebrationPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.all-completed-message h3 {
+  color: white;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.all-completed-message p {
+  color: #ddd;
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .progress-info {
+    gap: 12px;
+  }
+
+  .progress-stat {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .challenge-actions {
+    width: 100%;
+  }
+
+  .btn-view {
+    flex: 1;
+  }
+
+  .unlock-message h3 {
+    font-size: 20px;
+  }
+
+  .btn-unlock {
+    width: 100%;
+    padding: 14px 24px;
+  }
+
+  .response-modal,
+  .view-responses-modal {
+    width: 95%;
+  }
+
+  .response-box {
+    padding: 16px;
+  }
+
+  .photo-upload-label {
+    padding: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .unlock-next-block {
+    padding: 20px;
+    margin: 20px 12px;
+  }
+
+  .unlock-message h3 {
+    font-size: 18px;
+  }
+
+  .unlock-message p {
+    font-size: 14px;
+  }
+
+  .all-completed-message {
+    padding: 30px 20px;
+    margin: 20px 12px;
+  }
+
+  .all-completed-message h3 {
+    font-size: 22px;
+  }
+
+  .all-completed-message p {
+    font-size: 14px;
+  }
+}
+
+/* ===== SPINNER ===== */
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(127, 0, 255, 0.2);
+  border-top-color: #7f00ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.challenges-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 20px;
+  color: white;
+}
+
+.challenges-loading p {
+  font-size: 16px;
+  color: #aaa;
+}

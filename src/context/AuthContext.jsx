@@ -282,6 +282,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     userProfile,
+    currentUser: user,
     getPartnerProfile,
     registerWithEmail,
     loginWithEmail,

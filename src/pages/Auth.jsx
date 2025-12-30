@@ -1,23 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, Mail, User, Heart, Copy, Check, LogOut, Sparkles, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, User, Heart, Sparkles, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import "./Auth.css";
 
 // PANTALLA PRINCIPAL DE AUTH
 export default function Auth() {
   const navigate = useNavigate();
-  const { user, userProfile } = useAuth();
-
-  useEffect(() => {
-    if (user && userProfile?.partnerId) {
-      navigate("/app/home");
-    }
-  }, [user, userProfile, navigate]);
-
-  if (user && userProfile) {
-    return <ConnectPartner />;
-  }
 
   return (
     <div className="auth-page">
@@ -62,6 +51,8 @@ export function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    console.log('🔵 1. Iniciando login...');
+    
     if (!email || !password) {
       setError("Por favor completa todos los campos");
       return;
@@ -70,12 +61,20 @@ export function Login() {
     try {
       setLoading(true);
       setError("");
-      const result = await loginWithEmail(email, password);
-      if (result) {
-        navigate("/app/home");
-      }
+      
+      console.log('🔵 2. Llamando loginWithEmail...');
+      await loginWithEmail(email, password);
+      
+      console.log('🔵 3. Login exitoso, esperando...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('🔵 4. Navegando a /connect...');
+      navigate("/connect", { replace: true });
+      
+      console.log('🔵 5. Navegación completada');
+      
     } catch (error) {
-      console.error("Error en login:", error);
+      console.error("❌ Error en login:", error);
       if (error.code === "auth/user-not-found") {
         setError("Usuario no encontrado");
       } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
@@ -85,7 +84,6 @@ export function Login() {
       } else {
         setError("Error al iniciar sesión: " + error.message);
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -94,13 +92,13 @@ export function Login() {
     try {
       setLoading(true);
       setError("");
-      const result = await loginWithGoogle();
-      if (result) {
-        navigate("/app/home");
-      }
+      await loginWithGoogle();
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      navigate("/connect", { replace: true });
+      
     } catch (error) {
       setError("Error al iniciar sesión con Google");
-    } finally {
       setLoading(false);
     }
   };
@@ -204,11 +202,13 @@ export function Register() {
     try {
       setLoading(true);
       setError("");
-      const result = await registerWithEmail(name, email, password);
-      if (result) {
-        alert("Cuenta creada exitosamente!");
-        navigate("/app/home");
-      }
+      await registerWithEmail(name, email, password);
+      
+      alert("¡Cuenta creada exitosamente!");
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      navigate("/connect", { replace: true });
+      
     } catch (error) {
       console.error("Error en registro:", error);
       if (error.code === "auth/email-already-in-use") {
@@ -220,7 +220,6 @@ export function Register() {
       } else {
         setError("Error al registrarse: " + error.message);
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -230,10 +229,12 @@ export function Register() {
       setLoading(true);
       setError("");
       await loginWithGoogle();
-      navigate("/auth");
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      navigate("/connect", { replace: true });
+      
     } catch (error) {
       setError("Error al continuar con Google");
-    } finally {
       setLoading(false);
     }
   };
@@ -331,116 +332,6 @@ export function Register() {
             Inicia sesión
           </span>
         </p>
-      </div>
-    </div>
-  );
-}
-
-// CONECTAR CON PAREJA
-function ConnectPartner() {
-  const navigate = useNavigate();
-  const { userProfile, connectWithPartner, logout } = useAuth();
-  const [partnerCode, setPartnerCode] = useState("");
-  const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (userProfile?.partnerId) {
-      navigate("/app/home");
-    }
-  }, [userProfile, navigate]);
-
-  const copyCode = () => {
-    navigator.clipboard.writeText(userProfile.partnerCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleConnect = async () => {
-    if (!partnerCode) {
-      setError("Por favor ingresa un código");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError("");
-      const partner = await connectWithPartner(partnerCode);
-      alert(`Conectado con ${partner.name}!`);
-      navigate("/app/home");
-    } catch (error) {
-      setError(error.message || "Error al conectar. Verifica el código.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    if (window.confirm("¿Seguro que quieres cerrar sesión?")) {
-      await logout();
-      navigate("/auth");
-    }
-  };
-
-  if (!userProfile) return null;
-
-  return (
-    <div className="auth-page">
-      <div className="auth-content">
-        <div className="heart-container small">
-          <Heart className="heart-icon" size={60} strokeWidth={2} />
-        </div>
-
-        <h1 className="auth-title">Conectar con tu pareja</h1>
-        <p className="auth-subtitle">Hola {userProfile.name}</p>
-
-        <div className="code-card">
-          <h3 className="code-title">Tu código de conexión</h3>
-          <p className="code-description">
-            Comparte este código con tu pareja
-          </p>
-          
-          <div className="code-display-box">
-            <span className="code-text">{userProfile.partnerCode}</span>
-            <button className="code-copy-btn" onClick={copyCode}>
-              {copied ? <Check size={24} /> : <Copy size={24} />}
-            </button>
-          </div>
-        </div>
-
-        <div className="code-card">
-          <h3 className="code-title">¿Tu pareja ya tiene código?</h3>
-          
-          {error && <div className="auth-error">{error}</div>}
-
-          <div className="input-wrapper">
-            <input
-              className="auth-input code-input"
-              type="text"
-              placeholder="Ingresa el código"
-              value={partnerCode}
-              onChange={(e) => setPartnerCode(e.target.value.toUpperCase())}
-              onKeyPress={(e) => e.key === "Enter" && handleConnect()}
-              maxLength={8}
-              disabled={loading}
-            />
-          </div>
-
-          <button className="auth-btn primary-btn" onClick={handleConnect} disabled={loading}>
-            <Heart size={20} />
-            <span>{loading ? "Conectando..." : "Conectar"}</span>
-          </button>
-        </div>
-
-        <button className="auth-btn tertiary-btn" onClick={() => navigate("/app/home")}>
-          <span>Continuar sin pareja</span>
-        </button>
-
-        <button className="auth-btn logout-btn" onClick={handleLogout}>
-          <LogOut size={20} />
-          <span>Cerrar sesión</span>
-        </button>
       </div>
     </div>
   );

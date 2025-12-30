@@ -1,6 +1,6 @@
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { generateLoveMessage } from "./gemini";
+import { generateLoveMessage } from "./ai";
 
 // Obtener mensaje de amor del día
 export async function getTodayLoveMessage(userId, userName, partnerName) {
@@ -37,32 +37,34 @@ export async function getTodayLoveMessage(userId, userName, partnerName) {
     return newMessage;
   } catch (error) {
     console.error("❌ Error obteniendo mensaje:", error);
-    return `${partnerName}, cada día contigo es un regalo que atesoro ❤️`;
+    return `${partnerName}, cada día contigo es un regalo que atesoro`;
   }
 }
 
-// Generar nuevo mensaje (aunque ya exista uno hoy)
+// Generar nuevo mensaje FORZADO (aunque ya exista uno hoy)
 export async function generateNewLoveMessage(userId, userName, partnerName) {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const messageRef = doc(db, "loveMessages", `${userId}_${today}`);
+    const timestamp = Date.now(); // ⭐ CLAVE ÚNICA
+    const messageRef = doc(db, "loveMessages", `${userId}_${today}_${timestamp}`);
     
-    console.log("⚡ Generando nuevo mensaje...");
-    // Generar nuevo mensaje
-    const newMessage = await generateLoveMessage(userName, partnerName);
+    console.log("⚡ Generando nuevo mensaje FORZADO...");
+    // Generar nuevo mensaje con timestamp para garantizar unicidad
+    const newMessage = await generateLoveMessage(userName, partnerName, true);
     
     console.log("💾 Guardando nuevo mensaje...");
-    // Actualizar en Firestore
+    // Guardar con timestamp único
     await setDoc(messageRef, {
       userId,
       message: newMessage,
       date: today,
+      timestamp,
       createdAt: new Date().toISOString(),
       userName,
       partnerName
     });
     
-    console.log("✅ Nuevo mensaje guardado");
+    console.log("✅ Nuevo mensaje guardado con timestamp:", timestamp);
     return newMessage;
   } catch (error) {
     console.error("❌ Error generando nuevo mensaje:", error);

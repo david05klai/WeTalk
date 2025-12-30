@@ -1,0 +1,475 @@
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.sos-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);
+  overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+.sos-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(22, 33, 62, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 107, 157, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.sos-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.sos-back:hover {
+  background: rgba(255, 107, 157, 0.1);
+}
+
+.sos-back:active {
+  transform: scale(0.95);
+}
+
+.sos-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.sos-title h1 {
+  font-size: 20px;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.sos-title p {
+  font-size: 13px;
+  color: #FF6B9D;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ===== CATEGORÍAS ===== */
+.sos-categories {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sos-categories::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 107, 157, 0.1);
+  border: 1.5px solid rgba(255, 107, 157, 0.3);
+  border-radius: 20px;
+  color: #FF6B9D;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.category-chip:hover {
+  background: rgba(255, 107, 157, 0.15);
+  border-color: rgba(255, 107, 157, 0.5);
+  transform: translateY(-1px);
+}
+
+.category-chip.active {
+  background: linear-gradient(135deg, #FF6B9D, #C44569);
+  border-color: #FF6B9D;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+}
+
+.category-chip:active {
+  transform: scale(0.95);
+}
+
+/* ===== CHAT ===== */
+.sos-chat {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-behavior: smooth;
+}
+
+.sos-chat::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sos-chat::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.sos-chat::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 157, 0.3);
+  border-radius: 10px;
+}
+
+.sos-chat::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 157, 0.5);
+}
+
+/* ===== MENSAJES ===== */
+.message {
+  display: flex;
+  gap: 10px;
+  max-width: 85%;
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.assistant {
+  align-self: flex-start;
+}
+
+.message.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B9D, #C44569);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+}
+
+.message-bubble {
+  background: rgba(22, 33, 62, 0.8);
+  border: 1px solid rgba(255, 107, 157, 0.2);
+  border-radius: 16px;
+  padding: 12px 16px;
+  position: relative;
+}
+
+.message.user .message-bubble {
+  background: linear-gradient(135deg, #FF6B9D, #C44569);
+  border-color: transparent;
+}
+
+.message-bubble p {
+  margin: 0;
+  color: #FFFFFF;
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.message-time {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 6px;
+  text-align: right;
+}
+
+/* ===== TYPING INDICATOR ===== */
+.message-bubble.loading {
+  padding: 16px 20px;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FF6B9D;
+  animation: typingBounce 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+/* ===== MENSAJES RÁPIDOS ===== */
+.sos-quick-messages {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: rgba(22, 33, 62, 0.5);
+  border-top: 1px solid rgba(255, 107, 157, 0.1);
+}
+
+.sos-quick-messages::-webkit-scrollbar {
+  display: none;
+}
+
+.quick-message-btn {
+  padding: 10px 16px;
+  background: rgba(26, 26, 46, 0.8);
+  border: 1.5px solid;
+  border-radius: 20px;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.quick-message-btn:hover {
+  background: rgba(255, 107, 157, 0.15);
+  transform: translateY(-1px);
+}
+
+.quick-message-btn:active {
+  transform: scale(0.95);
+}
+
+.quick-message-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== INPUT ===== */
+.sos-input-container {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  background: rgba(22, 33, 62, 0.8);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 107, 157, 0.2);
+}
+
+.sos-input {
+  flex: 1;
+  background: rgba(26, 26, 46, 0.8);
+  border: 1.5px solid rgba(255, 107, 157, 0.3);
+  border-radius: 24px;
+  padding: 12px 20px;
+  color: #FFFFFF;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.sos-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sos-input:focus {
+  border-color: #FF6B9D;
+  background: rgba(26, 26, 46, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+}
+
+.sos-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sos-send-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B9D, #C44569);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+}
+
+.sos-send-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 157, 0.4);
+}
+
+.sos-send-btn:active {
+  transform: scale(0.95);
+}
+
+.sos-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== RESPONSIVE - TABLET ===== */
+@media (max-width: 768px) {
+  .sos-header {
+    padding: 14px 16px;
+  }
+
+  .sos-title h1 {
+    font-size: 18px;
+  }
+
+  .sos-title p {
+    font-size: 12px;
+  }
+
+  .sos-categories,
+  .sos-quick-messages {
+    padding: 12px 16px;
+  }
+
+  .sos-chat {
+    padding: 16px;
+  }
+
+  .message {
+    max-width: 90%;
+  }
+
+  .sos-input-container {
+    padding: 14px 16px;
+  }
+}
+
+/* ===== RESPONSIVE - MOBILE ===== */
+@media (max-width: 480px) {
+  .sos-header {
+    padding: 12px 12px;
+  }
+
+  .sos-title h1 {
+    font-size: 16px;
+  }
+
+  .sos-title p {
+    font-size: 11px;
+  }
+
+  .category-chip {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .sos-categories,
+  .sos-quick-messages {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .sos-chat {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .message {
+    max-width: 95%;
+  }
+
+  .message-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .message-bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+  }
+
+  .message-bubble p {
+    font-size: 14px;
+  }
+
+  .message-time {
+    font-size: 10px;
+  }
+
+  .quick-message-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .sos-input-container {
+    padding: 12px 12px;
+  }
+
+  .sos-input {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .sos-send-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ===== ANIMACIONES SUAVES ===== */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

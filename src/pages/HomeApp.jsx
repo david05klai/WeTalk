@@ -57,9 +57,20 @@ export default function HomeApp() {
   const [shouldAskMood, setShouldAskMood] = useState(true);
   const [showMoodIcon, setShowMoodIcon] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
+  const [partner, setPartner] = useState(null);
   const { userProfile, getPartnerProfile } = useAuth();
-  const partner = getPartnerProfile();
   const navigate = useNavigate();
+
+  // Cargar partner
+  useEffect(() => {
+    loadPartner();
+  }, [userProfile]);
+
+  async function loadPartner() {
+    const partnerData = await getPartnerProfile();
+    setPartner(partnerData);
+    console.log('👫 Partner cargado:', partnerData);
+  }
 
   // Mapeo de iconos para moods
   const iconMap = {
@@ -244,91 +255,93 @@ export default function HomeApp() {
   };
 
   return (
-    <div className="screen home-screen">
-      {/* Header Profesional */}
-      <div className="home-header-new">
-        <div className="user-info">
-          <h1 className="user-greeting">Hola, {userProfile?.name || "Usuario"}</h1>
-          {partner ? (
-            <div className="partner-status">
-              <Users size={16} />
-              <span>Conectado con {partner.name}</span>
-            </div>
-          ) : (
-            <div className="partner-status disconnected">
-              <Users size={16} />
-              <span>Sin pareja conectada</span>
-            </div>
-          )}
-        </div>
-        <div className="points-badge">
-          <Star size={18} />
-          <span>{userProfile?.points || 0}</span>
-        </div>
-      </div>
-
-      {/* Botón de Mood */}
-      {shouldAskMood && (
-        <div className="mood-card-new" onClick={() => setShowModal(true)}>
-          <div className="mood-card-icon">
-            <MessageCircle size={28} strokeWidth={2} />
-          </div>
-          <div className="mood-card-content">
-            <h3 className="mood-card-title">¿Cómo te sientes hoy?</h3>
-            <p className="mood-card-subtitle">Toca para contarnos</p>
-          </div>
-        </div>
-      )}
-
-      {/* Botón SOS */}
-      <button className="sos-card-new" onClick={() => setActiveFeature('sos')}>
-        <div className="sos-card-icon">
-          <AlertCircle size={28} strokeWidth={2} />
-        </div>
-        <div className="sos-card-content">
-          <h3 className="sos-card-title">Modo SOS</h3>
-          <p className="sos-card-subtitle">¿Necesitas ayuda?</p>
-        </div>
-      </button>
-
-      {/* Grid de funciones */}
-      <div className="features-grid-new">
-        {features.map((feature, index) => {
-          const IconComponent = feature.Icon;
-          if (!IconComponent) return null;
-          
-          return (
-            <div
-              key={feature.id}
-              className="feature-card-new"
-              onClick={() => setActiveFeature(feature.id)}
-              style={{
-                background: feature.gradient,
-                animationDelay: `${index * 0.05}s`
-              }}
-            >
-              <div className="feature-icon-wrapper">
-                <IconComponent size={36} color="white" strokeWidth={2.5} />
+    <>
+      <div className="screen home-screen">
+        {/* Header Profesional */}
+        <div className="home-header-new">
+          <div className="user-info">
+            <h1 className="user-greeting">Hola, {userProfile?.name || "Usuario"}</h1>
+            {partner ? (
+              <div className="partner-status">
+                <Users size={16} />
+                <span>Conectado con {partner.name}</span>
               </div>
-              <h3 className="feature-card-title">{feature.title}</h3>
-              <p className="feature-card-description">{feature.description}</p>
+            ) : (
+              <div className="partner-status disconnected">
+                <Users size={16} />
+                <span>Sin pareja conectada</span>
+              </div>
+            )}
+          </div>
+          <div className="points-badge">
+            <Star size={18} />
+            <span>{userProfile?.points || 0}</span>
+          </div>
+        </div>
+
+        {/* Botón de Mood */}
+        {shouldAskMood && (
+          <div className="mood-card-new" onClick={() => setShowModal(true)}>
+            <div className="mood-card-icon">
+              <MessageCircle size={28} strokeWidth={2} />
             </div>
-          );
-        })}
+            <div className="mood-card-content">
+              <h3 className="mood-card-title">¿Cómo te sientes hoy?</h3>
+              <p className="mood-card-subtitle">Toca para contarnos</p>
+            </div>
+          </div>
+        )}
+
+        {/* Botón SOS */}
+        <div className="sos-card-new" onClick={() => setActiveFeature('sos')}>
+          <div className="sos-card-icon">
+            <AlertCircle size={28} strokeWidth={2} />
+          </div>
+          <div className="sos-card-content">
+            <h3 className="sos-card-title">Modo SOS</h3>
+            <p className="sos-card-subtitle">¿Necesitas ayuda?</p>
+          </div>
+        </div>
+
+        {/* Grid de funciones */}
+        <div className="features-grid-new">
+          {features.map((feature, index) => {
+            const IconComponent = feature.Icon;
+            if (!IconComponent) return null;
+            
+            return (
+              <div
+                key={feature.id}
+                className="feature-card-new"
+                onClick={() => setActiveFeature(feature.id)}
+                style={{
+                  background: feature.gradient,
+                  animationDelay: `${index * 0.05}s`
+                }}
+              >
+                <div className="feature-icon-wrapper">
+                  <IconComponent size={36} color="white" strokeWidth={2.5} />
+                </div>
+                <h3 className="feature-card-title">{feature.title}</h3>
+                <p className="feature-card-description">{feature.description}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Icono flotante de mood */}
+        {showMoodIcon && todayMood && todayMood.iconName && iconMap[todayMood.iconName] && (
+          <div className="floating-mood-new" onClick={() => setShowAdvice(true)}>
+            {(() => {
+              const MoodIcon = iconMap[todayMood.iconName];
+              return <MoodIcon size={24} color="white" />;
+            })()}
+            <span>Ver consejo</span>
+          </div>
+        )}
       </div>
 
-      {/* Icono flotante de mood */}
-      {showMoodIcon && todayMood && todayMood.iconName && iconMap[todayMood.iconName] && (
-        <div className="floating-mood-new" onClick={() => setShowAdvice(true)}>
-          {(() => {
-            const MoodIcon = iconMap[todayMood.iconName];
-            return <MoodIcon size={24} color="white" />;
-          })()}
-          <span>Ver consejo</span>
-        </div>
-      )}
-
-      {/* Modal de selección de mood */}
+      {/* TODOS LOS MODALES FUERA DEL .screen */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal mood-modal-new" onClick={(e) => e.stopPropagation()}>
@@ -361,7 +374,6 @@ export default function HomeApp() {
         </div>
       )}
 
-      {/* Modal de consejo */}
       {showAdvice && todayMood && todayMood.iconName && iconMap[todayMood.iconName] && (
         <div className="modal-overlay" onClick={handleAdviceClose}>
           <div className="modal advice-modal-new" onClick={(e) => e.stopPropagation()}>
@@ -395,40 +407,17 @@ export default function HomeApp() {
         </div>
       )}
 
-      {/* Modales */}
-      {activeFeature && activeFeature !== 'sos' && activeFeature !== 'love-messages' && activeFeature !== 'challenges' && (
-        <div className="modal-overlay" onClick={() => setActiveFeature(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">En desarrollo</h2>
-            <p className="modal-subtitle">Esta función estará disponible pronto</p>
-            <button className="btn primary" onClick={() => setActiveFeature(null)}>
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {activeFeature === 'sos' && <SOSMode onClose={() => setActiveFeature(null)} />}
       {activeFeature === 'love-messages' && <LoveMessages onClose={() => setActiveFeature(null)} />}
-      {activeFeature === 'challenges' && <Challenges onClose={() => setActiveFeature(null)} />}
-    </div>
-  );
-}
-
-function SOSMode({ onClose }) {
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-          <AlertCircle size={48} color="#EF4444" />
-          <h2 className="modal-title">Modo SOS</h2>
-          <p className="modal-subtitle">Funcionalidad en desarrollo</p>
-        </div>
-        <button className="btn primary" onClick={onClose}>
-          Cerrar
-        </button>
-      </div>
-    </div>
+      {activeFeature === 'challenges' && <ChallengesModal onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'sos' && <SOSModal onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'calendar' && <CalendarModal onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'gallery' && <GalleryModal onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'diary' && <DiaryModal onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'games' && <GamesModal onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'wishlist' && <WishlistModal onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'reminders' && <RemindersModal onClose={() => setActiveFeature(null)} />}
+      {activeFeature === 'stats' && <StatsModal onClose={() => setActiveFeature(null)} />}
+    </>
   );
 }
 
@@ -536,17 +525,172 @@ function LoveMessages({ onClose }) {
   );
 }
 
-function Challenges({ onClose }) {
+// 🎯 CHALLENGES MODAL
+function ChallengesModal({ onClose }) {
+  const navigate = useNavigate();
+  
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
           <Target size={48} color="#8B5CF6" strokeWidth={2} />
-          <h2 className="modal-title">Reto del Día</h2>
+          <h2 className="modal-title">Retos del Día</h2>
         </div>
-        <p className="modal-subtitle">Funcionalidad en desarrollo</p>
-        <button className="btn primary" onClick={onClose}>
+        <p className="modal-subtitle">Completa desafíos juntos y gana puntos</p>
+        <button className="btn primary" onClick={() => { onClose(); navigate('/app/challenges'); }}>
+          Ver Retos
+        </button>
+        <button className="close-modal" onClick={onClose}>
           Cerrar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 🆘 MODAL SOS
+function SOSModal({ onClose }) {
+  const navigate = useNavigate();
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <AlertCircle size={48} color="#EF4444" strokeWidth={2} />
+          <h2 className="modal-title">Modo SOS</h2>
+        </div>
+        <p className="modal-subtitle">¿Necesitas ayuda para mejorar la comunicación?</p>
+        <button className="btn primary" onClick={() => { onClose(); navigate('/app/sos'); }}>
+          Activar SOS
+        </button>
+        <button className="close-modal" onClick={onClose}>
+          Cerrar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 📅 MODAL CALENDAR
+function CalendarModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <Calendar size={48} color="#3B82F6" strokeWidth={2} />
+          <h2 className="modal-title">Fechas Importantes</h2>
+        </div>
+        <p className="modal-subtitle">Función en desarrollo. Pronto podrás guardar todas tus fechas especiales.</p>
+        <button className="btn primary" onClick={onClose}>
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 📸 MODAL GALLERY
+function GalleryModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <Camera size={48} color="#F59E0B" strokeWidth={2} />
+          <h2 className="modal-title">Galería de Momentos</h2>
+        </div>
+        <p className="modal-subtitle">Función en desarrollo. Pronto podrás guardar tus fotos favoritas.</p>
+        <button className="btn primary" onClick={onClose}>
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 📖 MODAL DIARY
+function DiaryModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <BookOpen size={48} color="#10B981" strokeWidth={2} />
+          <h2 className="modal-title">Diario Compartido</h2>
+        </div>
+        <p className="modal-subtitle">Función en desarrollo. Pronto podrán escribir sus historias juntos.</p>
+        <button className="btn primary" onClick={onClose}>
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 🎮 MODAL GAMES
+function GamesModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <Gamepad2 size={48} color="#EF4444" strokeWidth={2} />
+          <h2 className="modal-title">Juegos para Parejas</h2>
+        </div>
+        <p className="modal-subtitle">Función en desarrollo. Pronto tendrán juegos divertidos para disfrutar juntos.</p>
+        <button className="btn primary" onClick={onClose}>
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ⭐ MODAL WISHLIST
+function WishlistModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <Star size={48} color="#FBBF24" strokeWidth={2} />
+          <h2 className="modal-title">Buzón de Deseos</h2>
+        </div>
+        <p className="modal-subtitle">Función en desarrollo. Pronto podrán compartir sus sueños y deseos.</p>
+        <button className="btn primary" onClick={onClose}>
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 🔔 MODAL REMINDERS
+function RemindersModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <Bell size={48} color="#06B6D4" strokeWidth={2} />
+          <h2 className="modal-title">Recordatorios</h2>
+        </div>
+        <p className="modal-subtitle">Función en desarrollo. Pronto podrás crear recordatorios importantes.</p>
+        <button className="btn primary" onClick={onClose}>
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 📊 MODAL STATS
+function StatsModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <TrendingUp size={48} color="#6366F1" strokeWidth={2} />
+          <h2 className="modal-title">Estadísticas</h2>
+        </div>
+        <p className="modal-subtitle">Función en desarrollo. Pronto verás las estadísticas de tu relación.</p>
+        <button className="btn primary" onClick={onClose}>
+          Entendido
         </button>
       </div>
     </div>

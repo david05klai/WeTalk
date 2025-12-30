@@ -1,76 +1,110 @@
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import "./App.css";
-import InstallButton from "./components/InstallButton";
-import InstallPWA from "./components/InstallPWA";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Home from './pages/Home';
+import Auth, { Login, Register } from './pages/Auth';
+import ConnectPartner from './pages/ConnectPartner';
+import AppLayout from './pages/AppLayout';
+import HomeApp from './pages/HomeApp';
+import Chat from './pages/Chat';
+import Challenges from './pages/Challenges';
+import SOSMode from './pages/SOSMode';
+import Settings from './pages/Settings';
 
-import Home from "./pages/Home";
-import Auth, { Login, Register } from "./pages/Auth"; // Importar Login y Register
-import AppLayout from "./pages/AppLayout";
-import HomeApp from "./pages/HomeApp";
-import Chat from "./pages/Chat";
-import Settings from "./pages/Settings";
-import DownloadPage from "./pages/DownloadPage";
-import { AuthProvider } from "./context/AuthContext";
-
-export default function App() {
-  const location = useLocation();
-  const navigate = useNavigate();
+// Componente para proteger rutas (requiere login)
+function ProtectedRoute({ children }) {
+  const { userProfile } = useAuth();
   
-  const showDownloadBtn = (location.pathname === '/' || location.pathname.startsWith('/app')) && location.pathname !== '/download';
+  if (!userProfile) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return children;
+}
 
+// Componente para rutas que requieren pareja
+function CoupleRequired({ children }) {
+  const { userProfile } = useAuth();
+  
+  if (!userProfile) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (!userProfile.partnerId) {
+    return <Navigate to="/connect" replace />;
+  }
+  
+  return children;
+}
+
+function AppRoutes() {
   return (
-    <AuthProvider>
-      <InstallButton />
-      <InstallPWA />
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       
-      {showDownloadBtn && (
-        <button 
-          onClick={() => navigate("/download")}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: 'linear-gradient(135deg, #7f00ff, #b84dff)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '999px',
-            padding: '12px 20px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 4px 15px rgba(127, 0, 255, 0.4)',
-            zIndex: 9999,
-            transition: 'all 0.3s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(127, 0, 255, 0.6)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 15px rgba(127, 0, 255, 0.4)';
-          }}
-        >
-          📱 <span>Descargar</span>
-        </button>
-      )}
+      {/* Ruta de conexión - requiere login pero no pareja */}
+      <Route 
+        path="/connect" 
+        element={
+          <ProtectedRoute>
+            <ConnectPartner />
+          </ProtectedRoute>
+        } 
+      />
       
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/download" element={<DownloadPage />} />
+      {/* Rutas de la app */}
+      <Route 
+        path="/app" 
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* 🔥 CAMBIO: Home YA NO requiere pareja */}
+        <Route 
+          path="home" 
+          element={<HomeApp />}
+        />
+        
+        <Route 
+          path="chat" 
+          element={
+            <CoupleRequired>
+              <Chat />
+            </CoupleRequired>
+          } 
+        />
+        
+        <Route 
+          path="challenges" 
+          element={
+            <CoupleRequired>
+              <Challenges />
+            </CoupleRequired>
+          } 
+        />
+        
+        <Route path="sos" element={<SOSMode />} />
+        <Route path="settings" element={<Settings />} />
+      </Route>
 
-        <Route path="/app" element={<AppLayout />}>
-          <Route path="home" element={<HomeApp />} />
-          <Route path="chat" element={<Chat />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
-    </AuthProvider>
+      {/* Redirigir rutas inválidas */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
